@@ -7,6 +7,8 @@ import { Colors } from '@/constants/Colors';
 import MoonStars from '@/assets/icons/MoonStars';
 import Book from '@/assets/icons/Book';
 import Person from '@/assets/icons/Person';
+import * as Haptics from 'expo-haptics';
+
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { colors } = useTheme();
@@ -43,6 +45,8 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           if (!isFocused && !event.defaultPrevented) {
             navigation.navigate(route.name, route.params);
           }
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          
         };
 
         const onLongPress = () => {
@@ -56,6 +60,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         const iconFillColor = isFocused ? Colors.dark.tabIconSelected : Colors.dark.tabIconDefault;
 
         return (
+          
           <PlatformPressable
             key={route.name}
             href={buildHref(route.name, route.params)}
