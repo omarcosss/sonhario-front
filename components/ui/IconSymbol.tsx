@@ -14,6 +14,7 @@ type IconSymbolName = keyof typeof MAPPING;
  * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
  */
 const MAPPING = {
+  'sun.max':'sun-o',
   'moon.stars.fill': 'moon-o',
   'book.closed.fill': 'book',
   'chevron.left.forwardslash.chevron.right': 'code',
