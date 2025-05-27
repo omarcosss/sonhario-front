@@ -19,6 +19,7 @@ const MAPPING = {
   'book.closed.fill': 'book',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'person.fill': 'user',
 } as IconMapping;
 
 /**

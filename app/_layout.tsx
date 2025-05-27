@@ -10,6 +10,9 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    LibreCaslonTextItalic: require('../assets/fonts/LibreCaslonText-Italic.ttf'),
+    LibreCaslonTextRegular: require('../assets/fonts/LibreCaslonText-Regular.ttf'),
+    LibreCaslonTextBold: require('../assets/fonts/LibreCaslonText-Bold.ttf'),
   });
 
   if (!loaded) {
