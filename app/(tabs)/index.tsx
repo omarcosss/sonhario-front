@@ -20,7 +20,7 @@ export default function HomeScreen() {
       }>
     <Greeting/>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome todo mundo!</ThemedText>
+        <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>

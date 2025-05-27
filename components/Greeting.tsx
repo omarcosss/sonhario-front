@@ -8,8 +8,8 @@ export default function Greeting() {
         <ThemedView style={styles.father}>
             <ThemedView style={styles.greeting}>
                 <ThemedView style={styles.text}>
-                    <ThemedText style={styles.title}>Bom dia,</ThemedText>
-                    <ThemedText style={styles.title}>Pedro</ThemedText>
+                    <ThemedText style={styles.text} >Bom dia,</ThemedText>
+                    <ThemedText style={styles.text}>Pedro!</ThemedText>
                 </ThemedView>
                 <IconSymbol style={styles.icon} color="white" size={70} name="sun.max"/>
             </ThemedView>
@@ -20,35 +20,39 @@ export default function Greeting() {
 }
 
 const styles = StyleSheet.create({
-    title:{
-        fontSize: 32,
-        textAlign: 'left',
-        justifyContent: 'flex-start',
-
+ father:{
+        display:'flex',
+        gap: 13,
     },
+
+     greeting:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+
     data:{
         textAlign: 'center',
+        fontSize: 10,
+        color: '#F2F5FC',
     },
     icon:{
         textAlign: "right",
+        color: '#FFFEE7',
     },
-    father:{
-        display:'flex',
-        gap: 13,
-    },
+   
     text:{
         display:'flex',
         flexDirection: 'column',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         gap: 13,
-        justifyContent: 'flex-start',
+        fontSize: 32,
+        color: '#F2F5FC',
+        // fontStyle: 'Libre Caslon Text',
+
+        
     },
-    greeting:{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
+   
 
 }
 
