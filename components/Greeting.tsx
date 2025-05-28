@@ -1,20 +1,20 @@
+import { StyleSheet, View } from 'react-native';
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 import { IconSymbol } from "./ui/IconSymbol";
-import { StyleSheet, Text, type TextProps } from 'react-native';
 
 export default function Greeting() {
     return(
-        <ThemedView style={styles.father}>
-            <ThemedView style={styles.greeting}>
-                <ThemedView style={styles.text}>
-                    <ThemedText style={styles.text} >Bom dia,</ThemedText>
+        <View style={styles.father}>
+            <View style={styles.greeting}>
+                <View style={styles.text}>
+                    <ThemedText style={styles.text}>Bom dia,</ThemedText>
                     <ThemedText style={styles.text}>Pedro!</ThemedText>
-                </ThemedView>
+                </View>
                 <IconSymbol style={styles.icon} color="white" size={70} name="sun.max"/>
-            </ThemedView>
+            </View>
             <ThemedText style={styles.data}>Domingo, 25 de Maio de 2025</ThemedText>
-        </ThemedView>
+        </View>
        
     )
 }
@@ -35,6 +35,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 10,
         color: '#F2F5FC',
+        fontFamily: 'LibreCaslonTextRegular',
+
     },
     icon:{
         textAlign: "right",
@@ -48,7 +50,7 @@ const styles = StyleSheet.create({
         gap: 13,
         fontSize: 32,
         color: '#F2F5FC',
-        // fontStyle: 'Libre Caslon Text',
+        fontFamily: 'LibreCaslonTextRegular',
 
         
     },
