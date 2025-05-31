@@ -22,7 +22,7 @@ export default function HomeScreen() {
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
                 style={styles.gradient}>
-      <ScrollView>
+      <View>
 
         <Greeting/>
         <View style={styles.container}>
@@ -41,26 +41,26 @@ export default function HomeScreen() {
                           7h
                       </Text>
                   </View>
-                  <ThemedText type="default" style={{ }}>
+                  <ThemedText type="default" style={{  }}>
                       Você teve uma ótima noite de sono! Isso ajuda a manter sua concentração e energia ao longo do dia.
                   </ThemedText>
               </Surface>
-              <View style={{ display: 'flex', flexDirection: 'row', gap: 20, width: '100%' }}>
-                  <Surface style={{ display: "flex", padding: 20, marginTop: 16, gap: 15, borderRadius: 30, borderWidth: 1, borderColor: Colors.Card.Stroke, backgroundColor: Colors.Card.Background }} elevation={4}>
-                      <Text style={{ color: Colors.Astronaut[50] }}>Você está com:</Text>
+              <View style={{ display: 'flex', flexDirection: 'row', gap: 20, width: '100%', flex: 1 }}>
+                  <Surface style={{ display: "flex", flex: 1, padding: 20, marginTop: 16, gap: 15, borderRadius: 30, borderWidth: 1, borderColor: Colors.Card.Stroke, backgroundColor: Colors.Card.Background }} elevation={4}>
+                      <Text style={{ color: Colors.Astronaut[50], }}>Você está com:</Text>
                       <Text style={{ color: Colors.Astronaut[50], fontSize: 32, fontWeight: 700 }}>3h</Text>
                       <Text style={{ color: Colors.Astronaut[50] }}>de deficit de sono esta semana</Text>
                   </Surface>
-                  <PlatformPressable style={{  }}>
+                  <PlatformPressable style={{ flex: 1 }}>
                       <Surface style={{ display: 'flex', flex: 1, justifyContent: 'flex-end', alignItems: 'flex-end', padding: 20, marginTop: 16, gap: 15, borderRadius: 30, borderWidth: 1, borderColor: Colors.Card.Stroke, backgroundColor: Colors.Card.Background }} elevation={4}>
-                          <Text style={{ color: Colors.Astronaut[50], fontSize: 32}}>+</Text>
-                          <Text style={{ color: Colors.Astronaut[50] }}>Adicionar</Text>
-                          <Text style={{ color: Colors.Astronaut[50] }}>Registro de Sono</Text>
+                          <Text style={{ color: Colors.Astronaut[50], fontSize: 32, textAlign: 'right' }}>+</Text>
+                          <Text style={{ color: Colors.Astronaut[50], textAlign: 'right' }}>Adicionar</Text>
+                          <Text style={{ color: Colors.Astronaut[50], textAlign: 'right' }}>Registro de Sono</Text>
                       </Surface>
                   </PlatformPressable>
               </View>
           </View>
-      </ScrollView>
+      </View>
     </LinearGradient>
     
   );
@@ -78,6 +78,8 @@ const styles = StyleSheet.create({
         gap: 20,
         padding: 20,
         paddingTop: Platform.OS === 'ios' ? 50 : 20,
+        backgroundColor: '#161616',
+
     },
     
 })

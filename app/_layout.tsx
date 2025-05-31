@@ -13,6 +13,7 @@ export default function RootLayout() {
     LibreCaslonTextItalic: require('../assets/fonts/LibreCaslonText-Italic.ttf'),
     LibreCaslonTextRegular: require('../assets/fonts/LibreCaslonText-Regular.ttf'),
     LibreCaslonTextBold: require('../assets/fonts/LibreCaslonText-Bold.ttf'),
+    Fustat: require('../assets/fonts/Fustat.ttf'),
   });
 
   if (!loaded) {
