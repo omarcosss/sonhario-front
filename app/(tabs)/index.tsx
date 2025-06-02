@@ -61,7 +61,7 @@ export default function HomeScreen() {
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
                 style={styles.gradient}>
-      <View style={{ flex: 1, justifyContent: 'flex-end', paddingTop: 20 }}>
+      <ScrollView style={{ flex: 1, paddingTop: 20 }}>
 
         <Greeting/>
         <View style={styles.container}>
@@ -100,7 +100,7 @@ export default function HomeScreen() {
                   </PlatformPressable>
               </View>
           </View>
-      </View>
+      </ScrollView>
     </LinearGradient>
     
   );
