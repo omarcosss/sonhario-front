@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Modalize } from 'react-native-modalize';
-import { Button, Surface } from 'react-native-paper';
+import { Button, Divider, Surface } from 'react-native-paper';
 import { Portal } from 'react-native-portalize';
 
 interface SleepEntry {
@@ -20,7 +20,20 @@ interface SleepEntry {
 }
 
 export default function HomeScreen() {
+    const [date, setDate] = useState(new Date());
     const [sleepHistory, setSleepHistory] = useState<(SleepEntry | null | undefined)[] | undefined>(undefined);
+    const [show, setShow] = useState(false);
+    const [mode, setMode] = useState('date');
+
+    const onChange = (e, selectedDate) => {
+        setDate(selectedDate);
+        setShow(false);
+    };
+
+    const showMode = (modeToShow) => {
+        setShow(true);
+        setMode(modeToShow);
+    }
 
     // Simulate fetching data from a database
     useEffect(() => {
@@ -76,6 +89,22 @@ export default function HomeScreen() {
     const onCloseregistryPlan1 = () => {
         registryPlan1Ref.current?.close();
     };
+
+    const registryPlanPredictionRef = useRef<Modalize>(null);
+
+    const onOpenregistryPlanPrediction = () => {
+        registryTypeSelectRef.current?.close();
+        registryPlan1Ref.current?.open();
+    };
+    const onBackregistryPlanPrediction = () => {
+        registryPlan1Ref.current?.close();
+        registryTypeSelectRef.current?.open();
+    };
+    const onCloseregistryPlanPrediction = () => {
+        registryPlan1Ref.current?.close();
+    };
+
+
 
     return (
         <LinearGradient
@@ -148,11 +177,30 @@ export default function HomeScreen() {
                         </View>
                     }
                 >
-                    <View style={{ display: 'flex', flexDirection: 'column', padding: 15 }}>
+                    <View style={{ display: 'flex', flexDirection: 'column' }}>
                         <View style={{ display: 'flex', flexDirection: 'row', flex: 1, justifyContent: 'space-between', alignItems: 'center', padding: 12}}>
                             <FText>Data</FText>
+                            <Button mode='contained' >00:00</Button>
+                        </View>
+                        <View style={{ display: 'flex', flexDirection: 'row', flex: 1, justifyContent: 'space-between', alignItems: 'center', padding: 12}}>
+                            <FText>Vou dormir as</FText>
                             <FText>Duração</FText>
                         </View>
+                        <View style={{ display: 'flex', flexDirection: 'row', flex: 1, justifyContent: 'space-between', alignItems: 'center', padding: 12}}>
+                            <FText>Vou acordar as</FText>
+                            <FText>Duração</FText>
+                        </View>
+                        <Divider />
+                        <View style={{ display: 'flex', flexDirection: 'row', flex: 1, justifyContent: 'space-between', alignItems: 'center', padding: 12}}>
+                            <FText>Cafeina consumida</FText>
+                            <FText>Duração</FText>
+                        </View>
+                        <View style={{ display: 'flex', flexDirection: 'row', flex: 1, justifyContent: 'space-between', alignItems: 'center', padding: 12}}>
+                            <FText>Tempo de exercício</FText>
+                            <FText>Duração</FText>
+                        </View>
+                        <Divider theme={{ colors: { primary: 'black' } }} />
+
                     </View>
                     </Modalize>
             </Portal>
