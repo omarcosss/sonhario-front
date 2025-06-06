@@ -5,6 +5,7 @@ import FText from '@/components/FText';
 import Greeting from '@/components/Greeting';
 import SleepChart from '@/components/SleepChart';
 import { Colors } from "@/constants/Colors";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { PlatformPressable } from '@react-navigation/elements';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
@@ -180,15 +181,34 @@ export default function HomeScreen() {
                     <View style={{ display: 'flex', flexDirection: 'column' }}>
                         <View style={{ display: 'flex', flexDirection: 'row', flex: 1, justifyContent: 'space-between', alignItems: 'center', padding: 12}}>
                             <FText>Data</FText>
-                            <Button mode='contained' >00:00</Button>
+                            <Button mode='contained' onPress={() => showMode("date")}>day</Button>
+                            <DateTimePicker 
+                                value={date}
+                                themeVariant='dark'
+                                mode="date"
+                                onChange={onChange}
+                            />
                         </View>
                         <View style={{ display: 'flex', flexDirection: 'row', flex: 1, justifyContent: 'space-between', alignItems: 'center', padding: 12}}>
                             <FText>Vou dormir as</FText>
-                            <FText>Duração</FText>
+                            <DateTimePicker 
+                                value={date}
+                                mode="time"
+                                is24Hour={true}
+                                onChange={onChange}
+                                themeVariant='dark'
+                                style={{ }}
+                            />
                         </View>
                         <View style={{ display: 'flex', flexDirection: 'row', flex: 1, justifyContent: 'space-between', alignItems: 'center', padding: 12}}>
                             <FText>Vou acordar as</FText>
-                            <FText>Duração</FText>
+                            <DateTimePicker 
+                                value={date}
+                                mode="time"
+                                is24Hour={true}
+                                themeVariant='dark'
+                                onChange={onChange}
+                            />
                         </View>
                         <Divider />
                         <View style={{ display: 'flex', flexDirection: 'row', flex: 1, justifyContent: 'space-between', alignItems: 'center', padding: 12}}>
