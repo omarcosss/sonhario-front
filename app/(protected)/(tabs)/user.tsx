@@ -1,12 +1,6 @@
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { Button, Surface } from "react-native-paper";
-import { View } from "react-native";
-import { Platform, StyleSheet, Text } from 'react-native';
-import { Colors } from "@/constants/Colors";
 import { LinearGradient } from 'expo-linear-gradient';
-import SleepScore from "@/assets/icons/SleepScore";
-import { PlatformPressable } from "@react-navigation/elements";
+import { Platform, StyleSheet, View } from "react-native";
 
 
 
@@ -19,13 +13,8 @@ export default function UserProfile() {
                 end={{ x: 0.5, y: 1 }}
                 style={styles.gradient}
             >
-
                 <ThemedText type="title">User Profile</ThemedText>
-                <ThemedText type="subtitle">This is the user profile screen.</ThemedText>
-                <ThemedText type="default">
-                    Here you can view and edit your profile information.
-                </ThemedText>
-                
+       
             </LinearGradient>
         </View>
     );

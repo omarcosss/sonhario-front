@@ -1,11 +1,16 @@
 import Input from '@/components/InputLogin';
 import { Colors } from "@/constants/Colors";
+import { AuthContext } from '@/utils/authContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { useContext } from 'react';
 import { Image, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 export default function LoginScreen() {
+
+  const authContext = useContext(AuthContext);
+
 
   const router = useRouter();
 
@@ -15,11 +20,12 @@ export default function LoginScreen() {
   const toForgotPassword = () => {
     router.push('/forgot_password')
   }
-  const handleLogin = () => {
-    // Lógica de autenticação (verificar email/senha) viria aqui no futuro. Por enquanto, apenas redirecionamos.
-    // Usamos 'replace' para que o usuário não possa voltar para a tela de login.
-    router.replace('/'); // Redireciona para a rota raiz (app/index.tsx ou app/(tabs)/index.tsx)
-  };
+  // const handleLogin = () => {
+  //   // Lógica de autenticação (verificar email/senha) viria aqui no futuro. Por enquanto, apenas redirecionamos.
+  //   // Usamos 'replace' para que o usuário não possa voltar para a tela de login.
+  //   setIsLoggedIn(true);
+  //   router.replace('/'); // Redireciona para a rota raiz (app/index.tsx ou app/(tabs)/index.tsx)
+  // };
   return (
     <LinearGradient 
       colors={['rgba(0, 0, 0, 0.00)', 'rgba(50, 64, 123, 0.40)']}
@@ -46,7 +52,7 @@ export default function LoginScreen() {
           </View>
           {/* --- BOTÃO DE ENTRAR --- */}
           <View id={'view entrar/cadastro'} style={styles.containerRegister} >
-              <Pressable style={styles.button} onPress={handleLogin}>
+              <Pressable style={styles.button} onPress={authContext.logIn}>
                 <Text style={styles.buttonText}>ENTRAR</Text>
               </Pressable>
             {/* ÁREA DO LINK DE CADASTRO */}
