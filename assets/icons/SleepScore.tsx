@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Svg, { Path, G, Rect, Mask, Defs, Filter, FeGaussianBlur, FeOffset, FeFlood, FeComposite, FeMerge, FeMergeNode, SvgProps } from 'react-native-svg';
+import Svg, { Defs, FeComposite, FeFlood, FeGaussianBlur, FeMerge, FeMergeNode, FeOffset, Filter, G, Mask, Path, Rect, SvgProps } from 'react-native-svg';
 
 interface SleepScoreProps extends SvgProps {
   iconColor?: string;

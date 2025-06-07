@@ -1,11 +1,13 @@
 import { Colors } from '@/constants/Colors';
 import React from 'react';
-import { Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 
 // Define the props interface for type checking (optional but good practice)
 interface MyTextProps {
   children: React.ReactNode; // To accept any valid React child (text, other components)
   style?: object; // To allow custom styles to be passed
+  fontSize?: number; // Optional font size prop
+  fontWeight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900'; // Optional fontWeight prop
 }
 
 /**
@@ -17,11 +19,16 @@ interface MyTextProps {
  * @param {object} [props.style] - Optional custom styles to apply to the Text component.
  * @returns {JSX.Element} A Text component.
  */
-const FText: React.FC<MyTextProps> = ({ children, style }) => {
+const FText: React.FC<MyTextProps> = ({ children, style, fontSize, fontWeight }) => {
   return (
-    // The Text component from react-native is used here.
-    // It combines the default styles with any custom styles passed via props.
-    <Text style={[styles.defaultText, style]}>
+    <Text
+      style={[
+        styles.defaultText,
+        style,
+        fontSize !== undefined ? { fontSize } : undefined,
+        fontWeight !== undefined ? { fontWeight } : undefined,
+      ]}
+    >
       {children}
     </Text>
   );
