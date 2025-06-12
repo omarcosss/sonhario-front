@@ -3,17 +3,17 @@ import IconLock from '@/assets/icons/Password';
 import IconUser from '@/assets/icons/User';
 import { Colors } from '@/constants/Colors';
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { Platform, StyleSheet, TextInput, View } from 'react-native';
 
 type IconProps={icon:'Envelope' | 'Lock' | 'User'}
 const Icon = ({icon}:IconProps) => {
     switch(icon){
         case 'Envelope':
-            return  <IconEnvelope height={16} width={20} color={'#D9D9D9'}/>;
+            return  <IconEnvelope height={18} width={22} color={'#D9D9D9'}/>;
         case 'Lock':
-            return <IconLock height={21} width={16} color={'#D9D9D9'}/>;
+            return <IconLock height={23} width={20} color={'#D9D9D9'}/>;
         case 'User':
-            return <IconUser height={30} width={30} color={'#D9D9D9'}/>;
+            return <IconUser height={20} width={20} color={'#D9D9D9'}/>;
     }
 
 }
@@ -21,6 +21,7 @@ type InputLoginProps={
     placeholder: string, 
     icone: 'Envelope' | 'Lock' | 'User',
     senha?: boolean,
+    
 }
 export default function InputLogin({placeholder,icone,senha=false}:InputLoginProps){
 
@@ -38,6 +39,7 @@ export default function InputLogin({placeholder,icone,senha=false}:InputLoginPro
                     placeholder={placeholder}
                     placeholderTextColor={Colors.Astronaut[100]}
                     secureTextEntry={senha}
+                    textAlignVertical="center" 
                 />
             </View>
         </View>
@@ -48,6 +50,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+        textAlign: 'center',
         height: 55,
         borderRadius: 16,
         borderWidth: 1,
@@ -60,6 +63,7 @@ const styles = StyleSheet.create({
         // --- AS MUDANÇAS ESTÃO AQUI ---
         flex: 1, // 1. FAZ O INPUT OCUPAR TODO O ESPAÇO RESTANTE
         height: '100%', // Garante que a área de toque vertical seja grande
+       
         
         // Estilos de fonte que você já tinha
         fontFamily: "Fustat",

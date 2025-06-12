@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
+import './global.css';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider } from '@/utils/authContext';
@@ -36,6 +37,8 @@ export default function RootLayout(){
                             <Stack.Screen name='login' options={{
                                 headerShown: false
                             }} />
+                             <Stack.Screen name="register" options={{ 
+                                headerShown: false }} />
                         </Stack>
                     </ThemeProvider>
                 </Host>

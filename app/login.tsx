@@ -117,6 +117,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',         // Deixa o link em negrito
     fontSize: 14,
     fontFamily: 'Fustast',
+    marginBottom: 5,
   },
   button: {
     backgroundColor: Colors.Astronaut[900], // Usando uma cor do seu tema
@@ -127,6 +128,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
+
   },
    buttonText: {
     color:Colors.Astronaut[100],
