@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     color:Colors.Astronaut[100],
     fontSize: 20,
     fontWeight: 'semibold',
-    fontFamily: 'Fustat',
+    fontFamily: 'Fustast',
   },
   // Estilo APENAS para a linha "Não tem conta? Cadastre-se"
   signupRow: {
