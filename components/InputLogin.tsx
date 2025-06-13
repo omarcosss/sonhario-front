@@ -1,11 +1,12 @@
 import IconEnvelope from '@/assets/icons/Email';
 import IconLock from '@/assets/icons/Password';
 import IconUser from '@/assets/icons/User';
+import IconCalendar from '@/assets/icons/Calendar';
 import { Colors } from '@/constants/Colors';
 import React, { useState } from 'react';
 import { Platform, StyleSheet, TextInput, View } from 'react-native';
 
-type IconProps={icon:'Envelope' | 'Lock' | 'User'}
+type IconProps={icon:'Envelope' | 'Lock' | 'User' | 'Calendar'}
 const Icon = ({icon}:IconProps) => {
     switch(icon){
         case 'Envelope':
@@ -14,18 +15,22 @@ const Icon = ({icon}:IconProps) => {
             return <IconLock height={23} width={20} color={'#D9D9D9'}/>;
         case 'User':
             return <IconUser height={20} width={20} color={'#D9D9D9'}/>;
+        case 'Calendar':
+            return <IconCalendar height={22} width={20} color={'#D9D9D9'}/>;
     }
 
 }
 type InputLoginProps={
     placeholder: string, 
-    icone: 'Envelope' | 'Lock' | 'User',
+    icone: 'Envelope' | 'Lock' | 'User' | 'Calendar',
     senha?: boolean,
+    value?: string,
+    onChangeText?: (text: string) => void;
     
 }
-export default function InputLogin({placeholder,icone,senha=false}:InputLoginProps){
+export default function InputLogin({placeholder,icone,senha=false, value, onChangeText}:InputLoginProps){
 
-    const [email,setEmail] = useState("");
+    // const [email,setEmail] = useState("");
 
 
     return(
@@ -34,8 +39,9 @@ export default function InputLogin({placeholder,icone,senha=false}:InputLoginPro
                 <Icon icon={icone}/>
                 <TextInput
                     style={styles.input}
-                    value={email}
-                    onChangeText={text =>setEmail(text)}
+                    value={value}
+                    // onChangeText={text =>setEmail(text)}
+                    onChangeText={onChangeText}
                     placeholder={placeholder}
                     placeholderTextColor={Colors.Astronaut[100]}
                     secureTextEntry={senha}
