@@ -1,3 +1,4 @@
+import EvenDeficit from '@/assets/icons/EvenDeficit';
 import SleepScore from '@/assets/icons/SleepScore';
 import FText from '@/components/FText';
 import Greeting from '@/components/Greeting';
@@ -17,11 +18,15 @@ interface SleepEntry {
 }
 
 export default function HomeScreen() {
-    const [sleepHistory, setSleepHistory] = useState<(SleepEntry | null | undefined)[] | undefined>(undefined);
-    const [profile, setProfile] = useState<any>();
-    const [latestSleep, setLatestSleep] = useState<number>();
-    const [error, setError] = useState<string>('');
+    const [error, setError] = useState<string | null>('');
     const [loading, setLoading] = useState<boolean>(true);
+
+    const [profile, setProfile] = useState<any>();
+    const [sleepHistory, setSleepHistory] = useState<(SleepEntry | null | undefined)[] | undefined>(undefined);
+    const [latestSleep, setLatestSleep] = useState<number>();
+    const [latestSleepRating, setLatestSleepRating] = useState<string>();
+    const [latestSleepColor, setLatestSleepColor] = useState<any>();
+    const [deficit, setDeficit] = useState<any>();
 
     const sleepRegistryRef = useRef<SleepRegistryModalsRef>(null);
 
@@ -34,79 +39,78 @@ export default function HomeScreen() {
     };
 
     useEffect(() => {
-        async function fetchProfileData () {
-            const { accessToken } = await getTokens();
+        setLoading(true);
+        setError(null);
 
+        const fetchPageData = async () => {
             try {
-                const response = await fetch(process.env.EXPO_PUBLIC_API_URL + '/profile/', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-                const data = await response.json();
-                if (!response.ok) {
-                    setError(data.detail || 'Algo deu errado');
-                } else {
-                    setProfile(data);
+                const { accessToken } = await getTokens();
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                };
+
+                const [profileResponse, sleepResponse, deficitResponse] = await Promise.all([
+                    fetch(process.env.EXPO_PUBLIC_API_URL + '/profile/', {
+                        method: 'GET', headers
+                    }),
+                    fetch(process.env.EXPO_PUBLIC_API_URL + '/entries/?limit=7', {
+                        method: 'GET', headers
+                    }),
+                    fetch(process.env.EXPO_PUBLIC_API_URL + '/insight/deficit/', {
+                        method: 'GET', headers
+                    })
+                ]);
+                if (!profileResponse.ok || !sleepResponse.ok || !deficitResponse.ok) {
+                    throw new Error('Falha em uma das requisições à API.');
                 }
+                const [profileData, sleepData, deficitData] = await Promise.all([
+                    profileResponse.json(),
+                    sleepResponse.json(),
+                    deficitResponse.json()
+                ]);
+
+                setProfile(profileData);
+                handleDeficit(deficitData);
+                latestSleepRating(sleepData[0].total_sleep_hours.toFixed(0));
+                setSleepHistory(sleepData.map((entry: any) => ({
+                    date: entry.date,
+                    hours: entry.total_sleep_hours
+                })));
             } catch (e) {
                 console.error(e);
                 setError('Não foi possível conectar ao servidor. Tente novamente.');
             } finally {
                 setLoading(false);
             }
+        };
+
+        const latestSleepRating = (hours: number) => {
+            setLatestSleep(hours);
+
+            let rating = "Você teve uma noite de sono moderada. Observe seus hábitos diaramente para obter melhorias."
+            if (hours > 6)
+                rating = "Você teve uma ótima noite de sono! Isso ajuda a manter sua concentração e energia ao longo do dia."
+            if (hours < 5)
+                rating = "Você não teve uma noite de sono muito boa. Observe seu deficit de sono semanal para manter suas horas em dia!"
+
+            setLatestSleepRating(rating);
+            setLatestSleepColor(hours < 5 ? Colors.RedOrange : Colors.Astronaut)
         }
 
-        fetchProfileData();
-    }, []);
-
-    useEffect(() => {
-        // const fetchSleepData = async () => {
-        //     await new Promise(resolve => setTimeout(resolve, 1000));
-        //     const fetchedData: (SleepEntry | null)[] = [
-        //         { date: '2025-06-07', hours: 7.5 },
-        //         { date: '2025-06-06', hours: 6.0 },
-        //         { date: '2025-06-04', hours: 8.2 },
-        //         { date: '2025-06-03', hours: 8.4 },
-        //         { date: '2025-06-02', hours: 5.5 },
-        //         { date: '2025-06-01', hours: 6.5 },
-        //         { date: '2025-05-31', hours: 6.9 },
-        //     ];
-        //     setSleepHistory(fetchedData);
-        // };
-
-        async function fetchSleepData () {
-            const { accessToken } = await getTokens();
-
-            try {
-                const response = await fetch(process.env.EXPO_PUBLIC_API_URL + '/entries/?limit=7', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-                const data = await response.json();
-                if (!response.ok) {
-                    setError(data.detail || 'Algo deu errado');
-                } else {
-                    const fetchedData: (SleepEntry | null)[] = []
-                    data.forEach((entry: any) => {
-                        fetchedData.push({date: entry.date, hours: entry.total_sleep_hours})
-                    })
-
-                    setLatestSleep(data[0].total_sleep_hours.toFixed(0));
-                    setSleepHistory(fetchedData);
-                }
-            } catch (e) {
-                console.error(e);
-                setError('Não foi possível conectar ao servidor. Tente novamente.');
+        const handleDeficit = (deficitData: any) => {
+            const deficitColor = {
+                "deficit": Colors.RedOrange[200],
+                "even": Colors.dark.text,
+                "surplus": Colors.Shamrock[200]
             }
+            
+            deficitData.color = deficitColor[deficitData.status as keyof typeof deficitColor];
+            deficitData.natural = deficitData.status == "deficit" ? 'deficit' : 'superavit';
+            setDeficit(deficitData)
         }
 
-        fetchSleepData();
+        fetchPageData();
     }, []);
 
     return (
@@ -120,26 +124,51 @@ export default function HomeScreen() {
                         <Greeting first_name={profile.first_name}/>
                         <View style={styles.container}>
                             <Surface style={styles.surfaceCard} elevation={4}>
-                                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <FText style={{color: Colors.Astronaut[50]}}>Último Registro:</FText>
-                                    <Button mode="contained" style={{ backgroundColor: Colors.Card.Stroke, backgroundBlendMode: 'multiply', borderWidth: 1, borderColor: Colors.Card.Stroke}}>
-                                        <FText style={{ color: Colors.Astronaut[200]}}>Ver todos</FText>
-                                    </Button>
-                                </View>
-                                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                                    <SleepScore iconColor={Colors.Astronaut[200]} shadowColor={Colors.Astronaut[600]} shadowRadius={20} />
-                                    <FText style={{ color: Colors.Astronaut[200], overflow: 'visible', padding: 7, fontSize: 32, fontWeight: '700', textShadowColor: '#4767C9', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 20, }}>
-                                        {latestSleep}h
-                                    </FText>
-                                </View>
-                                <FText>Você teve uma ótima noite de sono! Isso ajuda a manter sua concentração e energia ao longo do dia.</FText>
+                                {sleepHistory && sleepHistory.length > 0 ? (
+                                    <>
+                                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <FText style={{color: Colors.Astronaut[50]}}>Último Registro:</FText>
+                                        <Button mode="contained" style={{ backgroundColor: Colors.Card.Stroke, backgroundBlendMode: 'multiply', borderWidth: 1, borderColor: Colors.Card.Stroke}}>
+                                            <FText style={{ color: Colors.Astronaut[200]}}>Ver todos</FText>
+                                        </Button>
+                                    </View>
+                                    <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                                        <SleepScore iconColor={latestSleepColor[200]} shadowColor={latestSleepColor[600]} shadowRadius={20} />
+                                        <FText style={{ color: latestSleepColor[200], overflow: 'visible', padding: 7, fontSize: 32, fontWeight: '700', textShadowColor: latestSleepColor[900], textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 20, }}>
+                                            {latestSleep}h
+                                        </FText>
+                                    </View>
+                                    <FText>{latestSleepRating}</FText>
+                                    </>
+                                ) : (
+                                    <>
+                                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                                        <FText style={{color: Colors.Astronaut[50]}}>Seus Registros:</FText>
+                                        <Button mode="contained" style={{ backgroundColor: Colors.Card.Stroke, backgroundBlendMode: 'multiply', borderWidth: 1, borderColor: Colors.Card.Stroke}}>
+                                            <FText style={{ color: Colors.Astronaut[200]}}>Ver todos</FText>
+                                        </Button>
+                                    </View>                                    
+                                    <FText>Você ainda não fez nenhum registro de sono.</FText>
+                                    <FText>Vamos começar hoje?</FText>
+                                    </>
+                                )}
+                                
                                 <SleepChart sleepDataLast7Days={sleepHistory} />
                             </Surface>
                             <View style={{ display: 'flex', flexDirection: 'row', gap: 20, width: '100%', flex: 1, height: 140, }}>
                                 <Surface style={styles.smallCard} elevation={4}>
-                                    <FText style={{ fontWeight: '200' }}>Você está com:</FText>
-                                    <FText style={{ fontSize: 32, fontWeight: '700' }}>3h</FText>
-                                    <FText style={{ fontWeight: '200' }}>de deficit de sono esta semana</FText>
+                                    {(deficit && deficit.status != "even") ? (
+                                        <>
+                                        <FText style={{ fontWeight: '200' }}>Você está com:</FText>
+                                        <FText style={{ color: deficit.color, fontSize: 32, fontWeight: '700' }}>{deficit.value}h</FText>
+                                        <FText style={{ fontWeight: '400' }}>de {deficit.natural} de sono esta semana</FText>
+                                        </>
+                                    ) : (
+                                        <>
+                                        <EvenDeficit />
+                                        <FText style={{ fontWeight: '400' }}>Parabéns, sono em dia esta semana!</FText>
+                                        </>
+                                    )}                                    
                                 </Surface>
                                 <TouchableOpacity style={{ height: 140, flex: 1 }} onPress={onAddSleepPress}>
                                     <Surface style={styles.addButtonCard} elevation={4}>
