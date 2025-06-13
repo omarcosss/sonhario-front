@@ -14,8 +14,6 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
   const authContext = useContext(AuthContext);
   const router = useRouter();
 
@@ -30,7 +28,7 @@ export default function LoginScreen() {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`${API_URL}/token/`, {
+            const response = await fetch(process.env.EXPO_PUBLIC_API_URL + '/token/', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'},

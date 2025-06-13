@@ -1,10 +1,7 @@
-import { StyleSheet, View, Text } from 'react-native';
-import { ThemedText } from "./ThemedText";
-import { ThemedView } from "./ThemedView";
-import { IconSymbol } from "./ui/IconSymbol";
-import SunIcon from '@/assets/icons/SunIcon';
 import MoonStars from '@/assets/icons/MoonStars';
+import SunIcon from '@/assets/icons/SunIcon';
 import { useEffect, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 const getCurrentDateDetails = () => {
   const today = new Date();
@@ -41,7 +38,11 @@ const getCurrentDateDetails = () => {
   };
 };
 
-export default function Greeting() {
+interface GreetingProps {
+  first_name: string;
+}
+
+export default function Greeting({first_name}: GreetingProps) {
   const [dateDetails, setDateDetails] = useState(getCurrentDateDetails());
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function Greeting() {
       <View style={styles.greeting}>
         <View style={styles.text}>
           <Text style={styles.text}>{dateDetails.greetingText},</Text>
-          <Text style={styles.text}>Pedro!</Text>
+          <Text style={styles.text}>{first_name}!</Text>
         </View>
         <dateDetails.IconComponent width={70} height={70} />
         {/* Adjust icon props (width, height, iconColor) as needed */}
