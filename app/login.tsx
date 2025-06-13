@@ -2,7 +2,7 @@ import Input from '@/components/InputLogin';
 import { Colors } from "@/constants/Colors";
 import { AuthContext } from '@/utils/authContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useContext, useState } from 'react';
 import { ActivityIndicator, Image, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -13,6 +13,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { success } = useLocalSearchParams();
 
   const authContext = useContext(AuthContext);
   const router = useRouter();
@@ -90,7 +91,11 @@ export default function LoginScreen() {
           </View>
 
           {/* Área de ERRO */}
-          {error && <Text style={styles.errorText}>{error}</Text>}
+          {error ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : (
+            success && <Text style={styles.successText}>Usuário cadastrado com sucesso!</Text>
+          )}
 
           {/* --- BOTÃO DE ENTRAR --- */}
           <View id={'view entrar/cadastro'} style={styles.containerRegister} >
@@ -166,12 +171,20 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   errorText: {
-      color: '#ff8a80',
-      textAlign: 'center',
-      fontFamily: 'Fustat',
-      fontSize: 14,
-      marginTop: -10,
-      marginBottom: 10,
+    color: '#ff8a80',
+    textAlign: 'center',
+    fontFamily: 'Fustat',
+    fontSize: 14,
+    marginTop: -10,
+    marginBottom: 5,
+  },
+  successText: {
+    color: '#00C785',
+    textAlign: 'center',
+    fontFamily: 'Fustat',
+    fontSize: 14,
+    marginTop: -10,
+    marginBottom: 5,
   },
   button: {
     backgroundColor: Colors.Astronaut[900], // Usando uma cor do seu tema

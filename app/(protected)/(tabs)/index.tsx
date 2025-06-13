@@ -20,6 +20,7 @@ interface SleepEntry {
 export default function HomeScreen() {
     const [error, setError] = useState<string | null>('');
     const [loading, setLoading] = useState<boolean>(true);
+    const [refresh, setRefresh] = useState<boolean>(false);
 
     const [profile, setProfile] = useState<any>();
     const [sleepHistory, setSleepHistory] = useState<(SleepEntry | null | undefined)[] | undefined>(undefined);
@@ -71,6 +72,7 @@ export default function HomeScreen() {
                 ]);
 
                 setProfile(profileData);
+                console.log(profileData);
                 handleDeficit(deficitData);
                 latestSleepRating(sleepData[0].total_sleep_hours.toFixed(0));
                 setSleepHistory(sleepData.map((entry: any) => ({
@@ -111,14 +113,14 @@ export default function HomeScreen() {
         }
 
         fetchPageData();
-    }, []);
+    }, [refresh]);
 
     return (
         <>
             <LinearGradient colors={['rgba(0, 0, 0, 0.00)', 'rgba(50, 64, 123, 0.40)']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.gradient}>
                 <ScrollView style={{ flex: 1, paddingTop: 20 }} bounces={false}>
                     {loading && !error ? (
-                        <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                        <ActivityIndicator style={{marginTop: 420}} size="large" color={Colors.Astronaut[100]} />
                     ) : (
                         <>
                         <Greeting first_name={profile.first_name}/>

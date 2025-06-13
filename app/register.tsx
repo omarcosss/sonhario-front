@@ -1,163 +1,56 @@
-// import Input from '@/components/InputLogin';
-// import { Image, StyleSheet, View, Text, Pressable, Platform } from "react-native";
-// import { ScrollView } from "react-native-gesture-handler";
-// import { LinearGradient } from 'expo-linear-gradient';
-// import { Colors } from "@/constants/Colors";
-// import { useRouter } from 'expo-router';
-
-
-// export default function LoginScreen() {
-
-
-//   const router = useRouter();
-
-
-//   const toLogin = () => {
-//     router.push('/login');
-//   }
-//   const toForgotPassword = () => {
-//     router.push('/forgot_password')
-//   }
-//   const handleLogin = () => {
-//     // Lógica de autenticação (verificar email/senha) viria aqui no futuro. Por enquanto, apenas redirecionamos.
-//     // Usamos 'replace' para que o usuário não possa voltar para a tela de login.
-//     router.replace('/'); // Redireciona para a rota raiz (app/index.tsx ou app/(tabs)/index.tsx)
-//   };
-//   return (
-//     <LinearGradient
-//       colors={['rgba(0, 0, 0, 0.00)', 'rgba(50, 64, 123, 0.40)']}
-//                     start={{ x: 0.5, y: 0 }}
-//                     end={{ x: 0.5, y: 1 }}
-//                     style={styles.gradient}>
-//       <ScrollView contentContainerStyle={styles.scrollContent}>
-//         <View style={styles.container}>
-//           <Image style= {{height: 32, width: 148.41,}}
-//           source={require('@/assets/images/splash-icon.png')} />
-//           <View style={styles.inputContainer}>
-//             <Input placeholder='Nome' icone='User'/>
-//             <Input placeholder='Email' icone='Envelope'/>
-//             <Input placeholder='Senha' icone='Lock' senha/>
-//             <Input placeholder='Confirmar Senha' icone='Lock' senha/>
-//           </View>
-//           {/* --- BOTÃO DE CADASTRO --- */}
-//           <View id={'view entrar/cadastro'} style={styles.containerRegister} >
-//               <Pressable style={styles.button} onPress={handleLogin}>
-//                 <Text style={styles.buttonText}>CADASTRAR</Text>
-//               </Pressable>
-//             {/* ÁREA DO LINK DE CADASTRO */}
-//             <View style={styles.signupRow}>
-//               <Text style={styles.regularText}>
-//                 Já tem uma conta?{' '}
-//                 </Text>
-//                 <Pressable onPress={toLogin}>
-//                   <Text style={styles.linkText}>
-//                     Entrar
-//                   </Text>
-//                 </Pressable>
-//             </View>
-           
-//           </View>
-//         </View>
-//       </ScrollView>
-//     </LinearGradient>
-//   );
-// }
-
-
-// const styles = StyleSheet.create({
- 
-//   gradient: {
-//     flex: 1, // Garante que o gradiente ocupe a tela inteira
-//     paddingTop: Platform.OS === 'ios' ? 50 : 20,
-//     backgroundColor: '#161616',
-   
-//   },
-//   scrollContent: {
-//     flexGrow: 1, // Permite que o conteúdo do ScrollView cresça
-//     // justifyContent: 'center', // Centraliza o conteúdo verticalmente
-//     paddingHorizontal: 40, // Adiciona preenchimento lateral
-//     paddingTop: 100
-//   },
-//   container: {
-//     alignItems: 'center', // Centraliza os itens horizontalmente
-//     gap: 62, // Espaço entre a logo e o bloco de inputs
-//     marginTop: -55,
-//   },
-//   containerRegister:{
-//     width: '100%',
-//     gap: 24,
-//     alignItems: 'center',
-//   },
-//   inputContainer: {
-//     width: '100%', // Faz o container dos inputs ocupar toda a largura
-//     maxWidth: 500,
-//     gap: 48, // Adiciona um espaçamento de 20px ENTRE os inputs
-    
-//   },
-//    signupContainer: {
-//     marginTop: 20, // Adiciona um espaço acima do texto
-//   },
-//   regularText: {
-//     color: Colors.Astronaut[50], // Cor padrão para o texto
-//     fontWeight: 'regular',
-//     fontSize: 14,
-//     fontFamily: 'Fustast'
-//   },
-//    linkText: {
-//     color: Colors.Astronaut[50], // Uma cor de destaque do seu tema
-//     fontWeight: 'bold',         // Deixa o link em negrito
-//     fontSize: 14,
-//     fontFamily: 'Fustast',
-//   },
-//   button: {
-//     backgroundColor: Colors.Astronaut[900], // Usando uma cor do seu tema
-//     width: '100%',
-//     maxWidth: 500,
-//     paddingVertical: 15,
-//     borderRadius: 30,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     marginTop: 2,
-//     gap: 24,
-//   },
-//    buttonText: {
-//     color:Colors.Astronaut[100],
-//     fontSize: 20,
-//     fontWeight: 'semibold',
-//     fontFamily: 'Fustat',
-//   },
-//  // Estilo APENAS para a linha "Já tem uma conta? Entrar"
-// signupRow: {
-//   flexDirection: 'row', // Alinha os textos lado a lado
-//   justifyContent: 'center', // Garante que o conjunto fique centralizado
-// },
-// });
-
-//CODIGO ALTERADO LOGICA DE PROXIMO GEMINI
 import Input from '@/components/InputLogin';
-import { Image, StyleSheet, View, Text, Pressable, Platform, Alert } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
-import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from "@/constants/Colors";
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 export default function RegisterScreen() {
   const router = useRouter();
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // 1. ESTADO PARA CONTROLAR O PASSO ATUAL (1 ou 2)
   const [step, setStep] = useState(1);
 
   // 2. ESTADO ÚNICO PARA GUARDAR TODOS OS DADOS DO FORMULÁRIO
   const [formData, setFormData] = useState({
-    nome: '',
+    display_name: '',
     email: '',
-    senha: '',
-    confirmarSenha: '',
-    dataNascimento: '',
-    genero: '',
-    nomeExibicao: '',
+    password: '',
+    password_confirm: '',
+    birthdate: '',
+    gender: '',
   });
+
+  const handleRegister = async (checkOnly: boolean) => {
+    setLoading(true);
+    setError(null);
+    let success = false;
+    try {
+        const response = await fetch(process.env.EXPO_PUBLIC_API_URL + '/register/' + (checkOnly ? 'check/' : '') , {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'},
+            body: JSON.stringify(formData),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            setError(data.error || 'Preencha corretamente todos os campos.');
+        } else {
+            setError(null);
+            success = true;
+        }
+    } catch (e) {
+        console.error(e);
+        setError('Não foi possível conectar ao servidor. Tente novamente.');
+    } finally {
+        setLoading(false);
+        return success;
+    }
+  };
 
   // Função genérica para atualizar o estado do formulário
   const handleInputChange = (field: keyof typeof formData, value: string) => {
@@ -169,36 +62,31 @@ export default function RegisterScreen() {
   };
 
   // 3. LÓGICA PARA AVANÇAR PARA O PRÓXIMO PASSO
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     // Validação básica para o primeiro passo
-    if (!formData.nome || !formData.email || !formData.senha) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+    if (!formData.email || !formData.password) {
+      setError('Por favor, preencha todos os campos.')
       return;
     }
-    if (formData.senha !== formData.confirmarSenha) {
-      Alert.alert('Erro', 'As senhas não coincidem.');
+    if (formData.password !== formData.password_confirm) {
+      setError('Os campos de senha não coincidem.');
       return;
     }
     
-    // Simulação de verificação de disponibilidade (substitua pela sua lógica de API)
-    console.log('Verificando disponibilidade para:', formData.email);
-    
-    // Se tudo estiver ok, avança para o próximo passo
-    setStep(2);
+    if (await handleRegister(true))
+      setStep(2);
   };
 
   // 4. LÓGICA PARA FINALIZAR O CADASTRO
-  const handleFinalSubmit = () => {
+  const handleFinalSubmit = async () => {
     // Validação para o segundo passo
-    if (!formData.dataNascimento || !formData.nomeExibicao) {
-       Alert.alert('Erro', 'Por favor, preencha a data de nascimento e nome de exibição.');
+    if (!formData.birthdate || !formData.display_name) {
+       setError('Por favor, preencha todos os campos');
        return;
     }
 
-    console.log('Enviando dados completos para a API:', formData);
-    Alert.alert('Sucesso!', 'Cadastro realizado com sucesso.');
-    // Após o cadastro, você pode navegar para a tela principal ou de login
-    router.replace('/login'); 
+    if (await handleRegister(false))
+      router.replace('/login?success=true');
   };
 
   return (
@@ -218,15 +106,20 @@ export default function RegisterScreen() {
             {step === 1 && (
             <View style={styles.formSection}>
               <View style={styles.inputsWrapper}>
-                <Input placeholder='Nome' icone='User' value={formData.nome} onChangeText={(text) => handleInputChange('nome', text)} />
                 <Input placeholder='Email' icone='Envelope' value={formData.email} onChangeText={(text) => handleInputChange('email', text)} />
-                <Input placeholder='Senha' icone='Lock' senha value={formData.senha} onChangeText={(text) => handleInputChange('senha', text)} />
-                <Input placeholder='Confirmar Senha' icone='Lock' senha value={formData.confirmarSenha} onChangeText={(text) => handleInputChange('confirmarSenha', text)} />
+                <Input placeholder='Senha' icone='Lock' senha value={formData.password} onChangeText={(text) => handleInputChange('password', text)} />
+                <Input placeholder='Confirmar Senha' icone='Lock' senha value={formData.password_confirm} onChangeText={(text) => handleInputChange('password_confirm', text)} />
               </View>
+              {/* Área de ERRO */}
+              {error && <Text style={styles.errorText}>{error}</Text>}
 
               <View style={styles.actionsWrapper}>
-                <Pressable style={styles.solidButton} onPress={handleNextStep}>
-                  <Text style={styles.solidButtonText}>PRÓXIMO</Text>
+                <Pressable style={styles.button} onPress={handleNextStep} disabled={loading}>
+                    {loading ? (
+                        <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                    ) : (
+                        <Text style={styles.solidButtonText}>PRÓXIMO</Text>
+                    )}
                 </Pressable>
                 <View style={styles.loginLinkContainer}>
                   <Text style={styles.regularText}>Já tem uma conta? </Text>
@@ -241,10 +134,12 @@ export default function RegisterScreen() {
             {step === 2 && (
               <View style={styles.formSection}>
                 <View style={styles.inputsWrapper}>
-                  <Input placeholder='Nome de Usuário' icone='User' value={formData.nomeExibicao} onChangeText={(text) => handleInputChange('nomeExibicao', text)} />
-                  <Input placeholder='Gênero' icone='User' value={formData.genero} onChangeText={(text) => handleInputChange('genero', text)} />
-                  <Input placeholder='Data de Nascimento' icone='Calendar' value={formData.dataNascimento} onChangeText={(text) => handleInputChange('dataNascimento', text)} />
+                  <Input placeholder='Seu Nome' icone='User' value={formData.display_name} onChangeText={(text) => handleInputChange('display_name', text)} />
+                  <Input placeholder='Gênero' icone='User' value={formData.gender} onChangeText={(text) => handleInputChange('gender', text)} />
+                  <Input placeholder='Data de Nascimento' icone='Calendar' value={formData.birthdate} onChangeText={(text) => handleInputChange('birthdate', text)} />
                 </View>
+                {/* Área de ERRO */}
+                {error && <Text style={styles.errorText}>{error}</Text>}
 
                 {/* --- NOVA FILEIRA DE BOTÕES --- */}
                 <View style={styles.actionsWrapper}>
@@ -252,8 +147,12 @@ export default function RegisterScreen() {
                   <Pressable style={styles.outlineButton} onPress={() => setStep(1)}>
                     <Text style={styles.outlineButtonText}>VOLTAR</Text>
                   </Pressable>
-                  <Pressable style={styles.solidButton} onPress={handleFinalSubmit}>
-                    <Text style={styles.solidButtonText}>CADASTRAR</Text>
+                  <Pressable style={styles.solidButton} onPress={handleFinalSubmit} disabled={loading}>
+                    {loading ? (
+                        <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                    ) : (
+                        <Text style={styles.solidButtonText}>CADASTRAR</Text>
+                    )}
                   </Pressable>
                   </View>
 
@@ -280,7 +179,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    // justifyContent: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 40,
     // paddingVertical: 20,
     paddingTop: 50,
@@ -288,6 +187,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     width: '100%',
+    height: '80%',
     gap: 62, // Espaçamento consistente entre a logo, o formulário e o link de login
   },
   formContainer: {
@@ -333,6 +233,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
     fontFamily: 'Fustat',
+  },
+  errorText: {
+      color: '#ff8a80',
+      textAlign: 'center',
+      fontFamily: 'Fustat',
+      fontSize: 14,
+      marginTop: -10,
+      marginBottom: 5,
   },
   authWrapper: {
      width: '100%',
