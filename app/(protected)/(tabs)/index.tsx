@@ -19,6 +19,7 @@ interface SleepEntry {
 export default function HomeScreen() {
     const [sleepHistory, setSleepHistory] = useState<(SleepEntry | null | undefined)[] | undefined>(undefined);
     const [profile, setProfile] = useState<any>();
+    const [latestSleep, setLatestSleep] = useState<number>();
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -33,7 +34,7 @@ export default function HomeScreen() {
     };
 
     useEffect(() => {
-        async function getProfileInfo () {
+        async function fetchProfileData () {
             const { accessToken } = await getTokens();
 
             try {
@@ -58,23 +59,52 @@ export default function HomeScreen() {
             }
         }
 
-        getProfileInfo();
+        fetchProfileData();
     }, []);
 
     useEffect(() => {
-        const fetchSleepData = async () => {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const fetchedData: (SleepEntry | null)[] = [
-            { date: '2025-06-07', hours: 7.5 },
-            { date: '2025-06-06', hours: 6.0 },
-            { date: '2025-06-04', hours: 8.2 },
-            { date: '2025-06-03', hours: 8.4 },
-            { date: '2025-06-02', hours: 5.5 },
-            { date: '2025-06-01', hours: 6.5 },
-            { date: '2025-05-31', hours: 6.9 },
-        ];
-        setSleepHistory(fetchedData);
-        };
+        // const fetchSleepData = async () => {
+        //     await new Promise(resolve => setTimeout(resolve, 1000));
+        //     const fetchedData: (SleepEntry | null)[] = [
+        //         { date: '2025-06-07', hours: 7.5 },
+        //         { date: '2025-06-06', hours: 6.0 },
+        //         { date: '2025-06-04', hours: 8.2 },
+        //         { date: '2025-06-03', hours: 8.4 },
+        //         { date: '2025-06-02', hours: 5.5 },
+        //         { date: '2025-06-01', hours: 6.5 },
+        //         { date: '2025-05-31', hours: 6.9 },
+        //     ];
+        //     setSleepHistory(fetchedData);
+        // };
+
+        async function fetchSleepData () {
+            const { accessToken } = await getTokens();
+
+            try {
+                const response = await fetch(process.env.EXPO_PUBLIC_API_URL + '/entries/?limit=7', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    setError(data.detail || 'Algo deu errado');
+                } else {
+                    const fetchedData: (SleepEntry | null)[] = []
+                    data.forEach((entry: any) => {
+                        fetchedData.push({date: entry.date, hours: entry.total_sleep_hours})
+                    })
+
+                    setLatestSleep(data[0].total_sleep_hours.toFixed(0));
+                    setSleepHistory(fetchedData);
+                }
+            } catch (e) {
+                console.error(e);
+                setError('Não foi possível conectar ao servidor. Tente novamente.');
+            }
+        }
 
         fetchSleepData();
     }, []);
@@ -98,7 +128,9 @@ export default function HomeScreen() {
                                 </View>
                                 <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                                     <SleepScore iconColor={Colors.Astronaut[200]} shadowColor={Colors.Astronaut[600]} shadowRadius={20} />
-                                    <FText style={{ color: Colors.Astronaut[200], overflow: 'visible', padding: 7, fontSize: 32, fontWeight: '700', textShadowColor: '#4767C9', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 20, }} >7h</FText>
+                                    <FText style={{ color: Colors.Astronaut[200], overflow: 'visible', padding: 7, fontSize: 32, fontWeight: '700', textShadowColor: '#4767C9', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 20, }}>
+                                        {latestSleep}h
+                                    </FText>
                                 </View>
                                 <FText>Você teve uma ótima noite de sono! Isso ajuda a manter sua concentração e energia ao longo do dia.</FText>
                                 <SleepChart sleepDataLast7Days={sleepHistory} />
