@@ -17,15 +17,23 @@ const Icon = ({icon}:IconProps) => {
     }
 
 }
-type InputLoginProps={
-    placeholder: string, 
+type InputLoginProps = {
+    placeholder: string,
     icone: 'Envelope' | 'Lock' | 'User',
     senha?: boolean,
+    value: string;
+    onChangeText: (text: string) => void;
+    autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
 }
-export default function InputLogin({placeholder,icone,senha=false}:InputLoginProps){
 
-    const [email,setEmail] = useState("");
-
+export default function InputLogin({
+    placeholder,
+    icone,
+    senha=false,
+    value,
+    onChangeText,
+    autoCapitalize = 'sentences'
+}:InputLoginProps){
 
     return(
         <View>
@@ -33,11 +41,12 @@ export default function InputLogin({placeholder,icone,senha=false}:InputLoginPro
                 <Icon icon={icone}/>
                 <TextInput
                     style={styles.input}
-                    value={email}
-                    onChangeText={text =>setEmail(text)}
+                    value={value}
+                    onChangeText={onChangeText}
                     placeholder={placeholder}
                     placeholderTextColor={Colors.Astronaut[100]}
                     secureTextEntry={senha}
+                    autoCapitalize={autoCapitalize}
                 />
             </View>
         </View>

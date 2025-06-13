@@ -1,66 +1,80 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { createContext, PropsWithChildren, useEffect, useState } from "react";
+import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+// Importe as funções do seu novo módulo de armazenamento seguro
+import { deleteTokens, getTokens, saveTokens } from './authStorage';
 
+// O tipo de estado agora reflete a nova assinatura da função logIn.
 type AuthState = {
     isLoggedIn: boolean;
-    logIn: () => void;
-    logOut: () => void;
+    // logIn agora espera os tokens da API.
+    logIn: (access: string, refresh: string) => Promise<void>;
+    logOut: () => Promise<void>;
+    isLoading: boolean;
 }
-
-const authStorageKey = "auth-key";
 
 export const AuthContext = createContext<AuthState>({
     isLoggedIn: false,
-    logIn: () => {},
-    logOut: () => {},
+    logIn: async () => {},
+    logOut: async () => {},
+    isLoading: true, // Começa como true para verificar o armazenamento.
 });
+
+// Hook customizado para usar o AuthContext de forma mais limpa.
+export function useAuth() {
+    return useContext(AuthContext);
+}
 
 export function AuthProvider({ children }:PropsWithChildren) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
-    const storeAuthState = async (newState: { isLoggedIn: boolean }) => {
-        try {
-            const jsonValue = JSON.stringify(newState);
-            await AsyncStorage.setItem(authStorageKey, jsonValue);
-
-        } catch (error) {
-            console.log("Error saving", error);
-        }
-    };
-
-    const logIn = () => {
+    // Esta função será chamada quando o usuário logar com sucesso.
+    const logIn = async (access: string, refresh: string) => {
+        // 1. Salva os tokens no SecureStore.
+        await saveTokens(access, refresh);
+        // 2. Atualiza o estado da aplicação.
         setIsLoggedIn(true);
-        storeAuthState({ isLoggedIn: true });
-        console.log('login');
+        // 3. Redireciona para a tela principal (lógica original).
         router.replace("/");
     };
     
-    const logOut = () => {
+    // Esta função será chamada para deslogar o usuário.
+    const logOut = async () => {
+        // 1. Remove os tokens do SecureStore.
+        await deleteTokens();
+        // 2. Atualiza o estado da aplicação.
         setIsLoggedIn(false);
-        storeAuthState({ isLoggedIn: false });
+        // 3. Redireciona para a tela de login (lógica original).
         router.replace("/login");
     };
 
+    // Este useEffect agora verifica a existência de tokens no SecureStore
+    // para decidir se o usuário deve começar a sessão logado ou não.
     useEffect(() => {
-        const getAuthFromStorage = async () => {
+        const checkAuthStatus = async () => {
             try {
-                const value = await AsyncStorage.getItem(authStorageKey);
-                if (value !== null) {
-                    const auth = JSON.parse(value);
-                    setIsLoggedIn(auth.isLoggedIn);
+                // Tenta obter os tokens do armazenamento seguro.
+                const { accessToken } = await getTokens();
+                
+                // Se um token de acesso existir, o usuário está logado.
+                if (accessToken) {
+                    setIsLoggedIn(true);
                 }
             } catch (error) {
-                console.log("Error fetching from storage", error);
+                console.log("Erro ao verificar status de autenticação:", error);
+            } finally {
+                // Garante que o estado de carregamento termine após a verificação.
+                setIsLoading(false);
             }
         };
-        getAuthFromStorage();
+        
+        checkAuthStatus();
     }, []);
 
-
     return(
-        <AuthContext.Provider value={{ isLoggedIn, logIn, logOut }}>
+        // Fornece o estado e as funções para o resto do seu app.
+        <AuthContext.Provider value={{ isLoggedIn, logIn, logOut, isLoading }}>
             {children}
         </AuthContext.Provider>
     );

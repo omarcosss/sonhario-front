@@ -3,15 +3,20 @@ import { Colors } from "@/constants/Colors";
 import { AuthContext } from '@/utils/authContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useContext } from 'react';
-import { Image, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { useContext, useState } from 'react';
+import { ActivityIndicator, Image, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 export default function LoginScreen() {
 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
   const authContext = useContext(AuthContext);
-
-
   const router = useRouter();
 
   const toRegister = () => {
@@ -20,12 +25,35 @@ export default function LoginScreen() {
   const toForgotPassword = () => {
     router.push('/forgot_password')
   }
-  // const handleLogin = () => {
-  //   // Lógica de autenticação (verificar email/senha) viria aqui no futuro. Por enquanto, apenas redirecionamos.
-  //   // Usamos 'replace' para que o usuário não possa voltar para a tela de login.
-  //   setIsLoggedIn(true);
-  //   router.replace('/'); // Redireciona para a rota raiz (app/index.tsx ou app/(tabs)/index.tsx)
-  // };
+
+  const handleLogin = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(`${API_URL}/token/`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                  email: email,
+                  password: password }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                setError(data.detail || 'Email ou senha inválidos.');
+            } else {
+                const { access, refresh } = data;
+                await authContext.logIn(access, refresh);
+                router.replace('/');
+            }
+        } catch (e) {
+            console.error(e);
+            setError('Não foi possível conectar ao servidor. Tente novamente.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
   return (
     <LinearGradient 
       colors={['rgba(0, 0, 0, 0.00)', 'rgba(50, 64, 123, 0.40)']}
@@ -38,8 +66,20 @@ export default function LoginScreen() {
         width: 148.41,}}
           source={require('@/assets/images/splash-icon.png')} />
           <View style={styles.inputContainer}>
-            <Input placeholder='Email' icone='Envelope'/>
-            <Input placeholder='Senha' icone='Lock' senha/>
+            <Input 
+                placeholder='Email' 
+                icone='Envelope' 
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize='none'
+            />
+            <Input 
+                placeholder='Senha' 
+                icone='Lock' 
+                senha 
+                value={password}
+                onChangeText={setPassword}
+            />
           </View>
 
           {/* Área de ESQUECEU SENHA*/}
@@ -50,10 +90,18 @@ export default function LoginScreen() {
               </Text>
             </Pressable>
           </View>
+
+          {/* Área de ERRO */}
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
           {/* --- BOTÃO DE ENTRAR --- */}
           <View id={'view entrar/cadastro'} style={styles.containerRegister} >
-              <Pressable style={styles.button} onPress={authContext.logIn}>
-                <Text style={styles.buttonText}>ENTRAR</Text>
+              <Pressable style={styles.button} onPress={handleLogin} disabled={loading}>
+                  {loading ? (
+                      <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                  ) : (
+                      <Text style={styles.buttonText}>ENTRAR</Text>
+                  )}
               </Pressable>
             {/* ÁREA DO LINK DE CADASTRO */}
             <View style={styles.signupRow}>
@@ -117,6 +165,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',         // Deixa o link em negrito
     fontSize: 14,
     fontFamily: 'Fustast',
+  },
+  errorText: {
+      color: '#ff8a80',
+      textAlign: 'center',
+      fontFamily: 'Fustat',
+      fontSize: 14,
+      marginTop: -10,
+      marginBottom: 10,
   },
   button: {
     backgroundColor: Colors.Astronaut[900], // Usando uma cor do seu tema
