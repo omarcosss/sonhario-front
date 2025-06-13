@@ -163,6 +163,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',         // Deixa o link em negrito
     fontSize: 14,
     fontFamily: 'Fustast',
+    marginBottom: 5,
   },
   errorText: {
       color: '#ff8a80',
@@ -181,12 +182,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
+
   },
    buttonText: {
     color:Colors.Astronaut[100],
     fontSize: 20,
     fontWeight: 'semibold',
-    fontFamily: 'Fustat',
+    fontFamily: 'Fustast',
   },
   // Estilo APENAS para a linha "Não tem conta? Cadastre-se"
   signupRow: {
