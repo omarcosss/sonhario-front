@@ -1,13 +1,12 @@
-import { View, Platform } from 'react-native';
-import { useLinkBuilder, useTheme } from '@react-navigation/native';
-import { Text, PlatformPressable } from '@react-navigation/elements';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Colors } from '@/constants/Colors';
-import MoonStars from '@/assets/icons/MoonStars';
 import Book from '@/assets/icons/Book';
+import MoonStars from '@/assets/icons/MoonStars';
 import Person from '@/assets/icons/Person';
+import { Colors } from '@/constants/Colors';
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { PlatformPressable } from '@react-navigation/elements';
+import { useLinkBuilder, useTheme } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
+import { View } from 'react-native';
 
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -23,7 +22,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   };
 
   return (
-    <View style={{ flexDirection: 'row', paddingLeft: 10, paddingRight: 10, paddingTop: 5, paddingBottom: 40, bottom: 0, backgroundColor: Colors.dark.background, borderTopWidth: 1, borderTopColor: Colors.dark.border }}>
+    <View style={{ flexDirection: 'row', paddingLeft: 10, paddingRight: 10, paddingTop: 5, paddingBottom: 30, bottom: 0, backgroundColor: Colors.dark.background, borderTopWidth: 1, borderTopColor: Colors.dark.border }}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label =
@@ -68,6 +67,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             accessibilityLabel={options.tabBarAccessibilityLabel}
             testID={options.tabBarButtonTestID}
             onPress={onPress}
+            android_ripple={{ radius: 50 }}
             onLongPress={onLongPress}
             style={{ flex: 1 , display: 'flex', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 5, borderRadius: 50, backgroundColor: isFocused ? Colors.dark.tabItemActive : 'transparent' }}
           >
