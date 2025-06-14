@@ -29,7 +29,7 @@ const Chip: React.FC<ChipProps> = ({ label, backgroundColor, borderColor, textCo
 // Define types for the parent component props
 interface QualityChipProps {
     label: string;
-    quality: '1' | '2' | '3';
+    quality: 1 | 2 | 3;
     onPress?: () => void;
 }
 
@@ -39,20 +39,20 @@ const QualityChip: React.FC<QualityChipProps> = ({ label, quality, onPress }) =>
     let textColor: string;
 
     switch (quality) {
-        case '1':
+        case 1:
             backgroundColor = Colors.Shamrock[950];
             borderColor = Colors.Shamrock[900];
             textColor = Colors.Shamrock[400];
             break;
-        case '2':
-            backgroundColor = Colors.Shamrock[950];
-            borderColor = Colors.Shamrock[900];
-            textColor = Colors.Shamrock[400];
+        case 2:
+            backgroundColor = Colors.Supernova[950];
+            borderColor = Colors.Supernova[900];
+            textColor = Colors.Supernova[400];
             break;
-        case '3':
-            backgroundColor = Colors.Shamrock[950];
-            borderColor = Colors.Shamrock[900];
-            textColor = Colors.Shamrock[400];
+        case 3:
+            backgroundColor = Colors.RedOrange[950];
+            borderColor = Colors.RedOrange[900];
+            textColor = Colors.RedOrange[400];
             break;
         default:
             backgroundColor = Colors.Shamrock[950];
@@ -99,3 +99,4 @@ const styles = StyleSheet.create({
 });
 
 export { Chip, QualityChip };
+

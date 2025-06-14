@@ -32,7 +32,7 @@ export default function HomeScreen() {
     const sleepRegistryRef = useRef<SleepRegistryModalsRef>(null);
 
     const handleSaveSleepPlan = (data: SleepPlanData) => {
-        console.log("Data received from modals:", data);
+        setRefresh(!refresh);
     };
 
     const onAddSleepPress = () => {
@@ -72,7 +72,6 @@ export default function HomeScreen() {
                 ]);
 
                 setProfile(profileData);
-                console.log(profileData);
                 handleDeficit(deficitData);
                 latestSleepRating(sleepData[0].total_sleep_hours.toFixed(0));
                 setSleepHistory(sleepData.map((entry: any) => ({
