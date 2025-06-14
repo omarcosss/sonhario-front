@@ -13,7 +13,7 @@ type DreamCardProps = {
 
 const emotionEmoji = (emotion: number) => {
   const emojis = [
-    '😊', '😢', '🤨'
+    '💡', '😊', '😢', '🤨'
   ]
 
   return emojis[emotion];
