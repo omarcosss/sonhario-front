@@ -8,7 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { Surface } from "react-native-paper";
+import { ActivityIndicator, Surface } from "react-native-paper";
 
 interface SleepEntry {
   date: string;
@@ -19,14 +19,15 @@ interface SleepEntry {
 export default function AllEntries() {
     const [latestSleep, setLatestSleep] = useState<number>();
     const [sleepHistory, setSleepHistory] = useState<(SleepEntry | null | undefined)[] | undefined>(undefined);
-    const [error, setError] = useState<string>('');
     const [average, setAverage] = useState<number>();
     const [status, setStatus] = useState<string>();
     const [advice, setAdvice] = useState<string>();
     const [latestSleepRating, setLatestSleepRating] = useState<string>();
-    const [latestSleepColor, setLatestSleepColor] = useState<any>();
+    const [latestSleepColor, setLatestSleepColor] = useState<any>(Colors.Astronaut);
     
-
+    const [error, setError] = useState<string | null>('');
+    const [loading, setLoading] = useState<boolean>(true);
+    const [refresh, setRefresh] = useState<boolean>(false);
     
 
 
@@ -53,7 +54,8 @@ export default function AllEntries() {
                     })
 
                     const latestHours = data[0].total_sleep_hours;
-                    const latestHoursFixed = latestHours.toFixed(0);
+
+                    const latestHoursFixed: number = Math.round(latestHours);
 
                     setLatestSleep(latestHoursFixed);
                     setSleepHistory(fetchedData);
@@ -98,6 +100,8 @@ export default function AllEntries() {
             } catch (e) {
                 console.error(e);
                 setError('Não foi possível conectar ao servidor. Tente novamente.');
+            } finally {
+                setLoading(false);
             }
         }
         
@@ -110,38 +114,44 @@ export default function AllEntries() {
     return(
         <LinearGradient colors={['rgba(0, 0, 0, 0.00)', 'rgba(50, 64, 123, 0.40)']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.gradient}>
             <ScrollView bounces={false}>
-                <View style={{ display: 'flex', gap: 20 }}>
-                    <View style={{ display: 'flex', gap: 0, justifyContent: "center", alignItems: 'center'}}>
-                        <FText>Seu último registro:</FText>
-                        <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                            <MoonMeter iconColor={Colors.Astronaut[200]} />
-                            <FText fontSize={60} fontWeight="700" style={{ color: Colors.Astronaut[200], overflow: 'visible', padding: 7, fontWeight: '700', textShadowColor: Colors.Astronaut[900], textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 20, verticalAlign: 'middle' }}>
-                                {latestSleep}h
+                {error && <FText style={styles.errorText}>{error}</FText>}
+                {loading && !error ? (
+                    <ActivityIndicator style={{marginTop: 420}} size="large" color={Colors.Astronaut[100]} />
+                ) : (
+                    <>
+                    <View style={{ display: 'flex', gap: 20 }}>
+                        <View style={{ display: 'flex', gap: 0, justifyContent: "center", alignItems: 'center'}}>
+                            <FText>Seu último registro:</FText>
+                            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                                <MoonMeter iconColor={latestSleepColor[200]} />
+                                <FText fontSize={60} fontWeight="700" style={{ color: latestSleepColor[200], overflow: 'visible', padding: 7, fontWeight: '700', textShadowColor: latestSleepColor[900], textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 20, verticalAlign: 'middle' }}>
+                                    {latestSleep}h
+                                </FText>
+                            </View>
+                            <FText style={{ textAlign: 'center'}} >
+                                {latestSleepRating}
                             </FText>
                         </View>
-                        <FText style={{ textAlign: 'center'}} >
-                            Você teve uma ótima noite de sono! Isso ajuda a manter sua concentração e energia ao longo do dia.
-                        </FText>
-                    </View>
-                    {/* <View style={styles.divisor} /> */}
-                    <View>
-                        <PaginatedSleepChart sleepData={sleepHistory} />
-                    </View>
-                    <Surface elevation={5} style={[styles.surfaceCard, {display: 'flex', flexDirection: "row", padding: 20, gap: 15, alignItems: "center"}]}>
-                        <View style={{width: "30%", display: 'flex', gap: 10}}>
-                            <FText style={{ textAlign: 'center', }} fontSize={12}>Média da última semana:</FText>
-                            <FText style={{color: Colors.Astronaut[200], textAlign: 'center'}} fontSize={32} fontWeight="800">{average}h</FText>
-                            <FText style={{ textAlign: 'center', }} fontSize={12}>{status}</FText>
+                        {/* <View style={styles.divisor} /> */}
+                        <View>
+                            <PaginatedSleepChart sleepData={sleepHistory} />
                         </View>
-                        <View style={{width: 1, height: "100%", backgroundColor: Colors.Card.Stroke}}></View>
-                        <View style={{ display: 'flex', gap: 5, flex: 1, }}>
-                            <InsightIcon />
-                            <FText style={{ display: 'flex', flex: 1}}>
-                                {advice}
-                            </FText>
-                        </View>
-                    </Surface>
-                </View>
+                        <Surface elevation={5} style={[styles.surfaceCard, {display: 'flex', flexDirection: "row", padding: 20, gap: 15, alignItems: "center"}]}>
+                            <View style={{width: "30%", display: 'flex', gap: 10}}>
+                                <FText style={{ textAlign: 'center', }} fontSize={12}>Média da última semana:</FText>
+                                <FText style={{color: Colors.Astronaut[200], textAlign: 'center'}} fontSize={32} fontWeight="800">{average}h</FText>
+                                <FText style={{ textAlign: 'center', }} fontSize={12}>{status}</FText>
+                            </View>
+                            <View style={{width: 1, height: "100%", backgroundColor: Colors.Card.Stroke}}></View>
+                            <View style={{ display: 'flex', gap: 5, flex: 1, }}>
+                                <InsightIcon />
+                                <FText style={{ display: 'flex', flex: 1}}>
+                                    {advice}
+                                </FText>
+                            </View>
+                        </Surface>
+                    </View>
+                </>)}
             </ScrollView>
         </LinearGradient>
     );
@@ -168,5 +178,13 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.Card.Stroke,
         backgroundColor: Colors.Card.Background
+    },
+    errorText: {
+        color: '#ff8a80',
+        textAlign: 'center',
+        fontFamily: 'Fustat',
+        fontSize: 14,
+        marginTop: -10,
+        marginBottom: 5,
     },
 });

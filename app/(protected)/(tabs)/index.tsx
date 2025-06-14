@@ -7,7 +7,7 @@ import SleepRegistryModals, { SleepPlanData, SleepRegistryModalsRef } from '@/co
 import { Colors } from "@/constants/Colors";
 import { getTokens } from '@/utils/authStorage';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Link } from 'expo-router';
+import { Link, RelativePathString } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -132,7 +132,7 @@ export default function HomeScreen() {
                                     <>
                                     <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <FText style={{color: Colors.Astronaut[50]}}>Último Registro:</FText>
-                                        <Link href="/entries">
+                                        <Link href={"/entries" as RelativePathString}>
                                             <Button mode="contained" style={{ backgroundColor: Colors.Card.Stroke, backgroundBlendMode: 'multiply', borderWidth: 1, borderColor: Colors.Card.Stroke}}>
                                                 <FText style={{ color: Colors.Astronaut[200]}}>Ver todos</FText>
                                             </Button>
@@ -150,7 +150,7 @@ export default function HomeScreen() {
                                     <>
                                     <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                                         <FText style={{color: Colors.Astronaut[50]}}>Seus Registros:</FText>
-                                        <Link href="/entries">
+                                        <Link href={"/entries" as RelativePathString}>
                                             <Button mode="contained" style={{ backgroundColor: Colors.Card.Stroke, backgroundBlendMode: 'multiply', borderWidth: 1, borderColor: Colors.Card.Stroke}}>
                                                 <FText style={{ color: Colors.Astronaut[200]}}>Ver todos</FText>
                                             </Button>

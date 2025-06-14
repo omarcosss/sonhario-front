@@ -139,7 +139,7 @@ const PaginatedSleepChart: FC<PaginatedSleepChartProps> = ({ sleepData }) => {
       y: tooltipTop,
       day: dayData.day,
       hours: dayData.hours,
-      date: dayData.date,
+      date: Intl.DateTimeFormat('pt-BR').format(new Date(dayData.date)),
     });
   };
 
