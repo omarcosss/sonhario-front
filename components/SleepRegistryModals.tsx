@@ -1,17 +1,19 @@
 import { Colors } from "@/constants/Colors";
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { Modal, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import ModalRN from 'react-native-modal';
 import { Modalize } from 'react-native-modalize';
 import { Button, Divider } from 'react-native-paper';
 import { Portal } from 'react-native-portalize';
 
+import InsightIcon from "@/assets/icons/InsightIcon";
 import Readiness from '@/assets/icons/Readiness';
 import SleepScore from '@/assets/icons/SleepScore';
 import Counter from '@/components/Counter';
 import FText from '@/components/FText';
 import { QualityChip } from '@/components/QualityChip';
+import { getTokens } from "@/utils/authStorage";
 import { BlurView } from "expo-blur";
 
 
@@ -20,7 +22,8 @@ export interface SleepPlanData {
     goToBedTime: Date;
     wakeUpTime: Date;
     caffeineAmount: number;
-    exerciseMinutes: number;
+    // exerciseMinutes: number;
+    screenTime: number;
 }
 
 export interface SleepPrevData {
@@ -28,7 +31,8 @@ export interface SleepPrevData {
     goToBedTime: Date;
     wakeUpTime: Date;
     caffeineAmount: number;
-    exerciseMinutes: number;
+    // exerciseMinutes: number;
+    screenTime: number;
 }
 
 interface SleepRegistryModalsProps {
@@ -39,8 +43,30 @@ export interface SleepRegistryModalsRef {
     open: () => void;
 }
 
+const dateConvertTo = (date: Date, output: 'date' | 'time'): string => {
+  if (output === 'date') {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');    
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+  }
+
+  if (output === 'time') {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${hours}:${minutes}`;
+  }
+
+  throw new Error("Invalid output type specified. Use 'date' or 'time'.");
+};
+
 const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModalsProps>(
     ({ onSave }, ref) => {
+
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState<string | null>(null);
         
         const [sleepDate, setSleepDate] = useState(new Date());
         const [goToBedTime, setGoToBedTime] = useState(new Date());
@@ -49,27 +75,68 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
         const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
         const [activePicker, setActivePicker] = useState<'date' | 'goToBed' | 'wakeUp'>('date');
         const [caffeineAmount, setCaffeineAmount] = useState(1);
-        const [exerciseMinutes, setExerciseMinutes] = useState(30);
+        // const [exerciseMinutes, setExerciseMinutes] = useState(30);
+        const [screenTime, setScreenTime] = useState(30);
         const [tempDate, setTempDate] = useState(new Date());
         const [showConfirmPlan, setShowConfirmPlan] = useState(false);
         const [showConfirmPrev, setShowConfirmPrev] = useState(false);
+
+        const [insightResults, setInsightResults] = useState<any>(null);
 
         const registryTypeSelectRef = useRef<Modalize>(null);
         const registryPlan1Ref = useRef<Modalize>(null);
         const registryPlanPredictionRef = useRef<Modalize>(null);
         const registryPrevRef = useRef<Modalize>(null);
-
-
-        
+       
         useImperativeHandle(ref, () => ({
         open: () => {
             registryTypeSelectRef.current?.open();
         },
         }));
 
-        
-        const onOpenregistryTypeSelect = () => registryTypeSelectRef.current?.open();
-        const onCloseregistryTypeSelect = () => registryTypeSelectRef.current?.close();
+        const handleEntryPost = async (insight: boolean=false) => {
+            setLoading(true);
+            setError(null);
+            let success = false;
+            try {
+                const { accessToken } = await getTokens();
+                const response = await fetch(process.env.EXPO_PUBLIC_API_URL + (insight ? '/insight/entry/' : '/entries/'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        date: dateConvertTo(sleepDate, "date"),
+                        sleep_start_time: dateConvertTo(goToBedTime, "time"),
+                        sleep_end_time: dateConvertTo(wakeUpTime, "time"),
+                        coffee_cups: caffeineAmount,
+                        screen_time: screenTime,
+                    }),
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    setError(data.error || 'Ocorreu um erro inesperado.');
+                } else {
+                    success = true;
+                    if (insight) setInsightResults(data.data);
+                }
+            } catch (e) {
+                console.error(e);
+                setError('Não foi possível conectar ao servidor. Tente novamente.');
+            } finally {
+                setLoading(false);
+                return success;
+            }
+        };
+
+        const onOpenregistryTypeSelect = () => {
+            setError(null);
+            registryTypeSelectRef.current?.open();
+        }
+        const onCloseregistryTypeSelect = () => {
+            registryTypeSelectRef.current?.close();
+        }
 
         const onOpenregistryPlan1 = () => {
             onCloseregistryTypeSelect();
@@ -82,8 +149,12 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
         const onCloseregistryPlan1 = () => registryPlan1Ref.current?.close();
 
         const onOpenregistryPlanPrediction = () => {
-            onCloseregistryPlan1();
-            registryPlanPredictionRef.current?.open();
+            handleEntryPost(true).then((response) => {
+                if (response) {
+                    onCloseregistryPlan1();
+                    registryPlanPredictionRef.current?.open();
+                }
+            })
         };
         const onBackregistryPlanPrediction = () => {
             registryPlanPredictionRef.current?.close();
@@ -101,9 +172,12 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
         };
         const onCloseregistryPrev = () => registryPrevRef.current?.close();
 
-
         const handleSavePlan = () => {
-            setShowConfirmPlan(true);
+            handleEntryPost(false).then((response) => {
+                if (response) {
+                    setShowConfirmPlan(true);
+                }
+            })
         };
 
         const handleConfirmSavePlan = () => {
@@ -112,7 +186,7 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
                 goToBedTime,
                 wakeUpTime,
                 caffeineAmount,
-                exerciseMinutes
+                screenTime
             };
             onSave(data);
             onCloseregistryPlanPrediction();
@@ -121,7 +195,11 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
 
 
         const handleSavePrev = () => {
-            setShowConfirmPrev(true);
+            handleEntryPost(false).then((response) => {
+                if (response) {
+                    setShowConfirmPrev(true);
+                }
+            })
         };
 
         const handleConfirmSavePrev = () => {
@@ -130,7 +208,7 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
                 goToBedTime,
                 wakeUpTime,
                 caffeineAmount,
-                exerciseMinutes
+                screenTime
             };
             onSave(data);
             onCloseregistryPrev();
@@ -195,10 +273,19 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
             
             <Modalize ref={registryPlan1Ref} {...modalizeOptions}
                 FooterComponent={
+                    <>
+                    {error && <FText style={styles.errorText}>{error}</FText>}
                     <View style={styles.footer}>
                         <Button mode="outlined" onPress={onBackregistryPlan1} style={{ flex: 1, borderColor: Colors.Astronaut[200] }}><FText style={{color:Colors.Astronaut[200]}}>Voltar</FText></Button>
-                        <Button mode="contained" onPress={onOpenregistryPlanPrediction} style={{ flex: 1, backgroundColor: Colors.Astronaut[900] }}>Avançar</Button>
+                        <Button mode="contained" onPress={onOpenregistryPlanPrediction} style={{ flex: 1, backgroundColor: Colors.Astronaut[900] }} disabled={loading} >
+                            {loading ? (
+                                <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                            ) : (
+                                "Avançar"
+                            )}
+                        </Button>
                     </View>
+                    </>
                 }>
                 <View style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                     <View style={styles.row}>
@@ -225,33 +312,46 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
                         <Counter value={caffeineAmount} onValueChange={setCaffeineAmount} minValue={0} />
                     </View>
                     <View style={styles.row}>
-                        <FText>Tempo de exercício</FText>
-                        <Counter value={exerciseMinutes} onValueChange={setExerciseMinutes} step={5} minValue={0} label="min" />
+                        <FText>Tempo de tela</FText>
+                        <Counter value={screenTime} onValueChange={setScreenTime} step={5} minValue={0} label="min" />
                     </View>
                 </View>
             </Modalize>
 
             <Modalize ref={registryPlanPredictionRef} {...modalizeOptions}
                 FooterComponent={
+                    <>
+                    {error && <FText style={styles.errorText}>{error}</FText>}
                     <View style={styles.footer}>
                         <Button mode="outlined" onPress={onBackregistryPlanPrediction} style={{ flex: 1, borderColor: Colors.Astronaut[200] }} ><FText style={{color:Colors.Astronaut[200]}}>Voltar</FText></Button>
-                        <Button mode="contained" onPress={handleSavePlan} style={{ flex: 1, backgroundColor: Colors.Astronaut[900] }} >Salvar</Button>
+                        <Button mode="contained" onPress={handleSavePlan} style={{ flex: 1, backgroundColor: Colors.Astronaut[900] }} disabled={loading} >
+                            {loading ? (
+                                <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                            ) : (
+                                "Salvar"
+                            )}
+                        </Button>
                     </View>
+                    </>
                 }>
                 <View style={{ display: 'flex', flexDirection: 'column', gap: 20, justifyContent: 'center', alignItems: 'center' }}>
-                    <SleepScore width={48} height={48} />
-                    <FText fontSize={16}>Você planeja dormir por</FText>
-                    <FText fontSize={24} fontWeight='bold'>7 horas e 20 minutos</FText>
-                    <Divider />
-                    <FText>Com base no seu histórico de sono, você pode esperar:</FText>
-                    <View style={styles.predictionRow}>
-                        <View style={styles.predictionLabel}><Readiness /><FText fontSize={16}>Produtividade:</FText></View>
-                        <QualityChip label='Alta' quality="1" />
-                    </View>
-                    <View style={styles.predictionRow}> 
-                        <View style={styles.predictionLabel}><Readiness /><FText fontSize={16}>Estresse:</FText></View>
-                        <QualityChip label='Baixo' quality="1" />
-                    </View>
+                    {insightResults && <>
+                        <SleepScore width={48} height={48} />
+                        <FText fontSize={16}>Você planeja dormir por</FText>
+                        <FText fontSize={24} fontWeight='bold'>{insightResults.time_string}</FText>
+                        <Divider />
+                        <View style={styles.predictionRow}>
+                            <View style={styles.predictionLabel}><Readiness /><FText fontSize={16}>Produtividade:</FText></View>
+                            <QualityChip label={insightResults.productivity_string} quality={insightResults.productivity_color} />
+                        </View>
+                        <View style={styles.predictionRow}> 
+                            <View style={styles.predictionLabel}><Readiness /><FText fontSize={16}>Estresse:</FText></View>
+                            <QualityChip label={insightResults.stress_string} quality={insightResults.stress_color} />
+                        </View>
+                        <Divider />
+                        <InsightIcon style={{ alignSelf: 'flex-start' }}  />
+                        <FText style={{textAlign: 'center'}}>{insightResults.advice}</FText>
+                    </>}
                 </View>
             </Modalize>
 
@@ -279,10 +379,19 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
 
             <Modalize ref={registryPrevRef} {...modalizeOptions}
                 FooterComponent={
+                    <>
+                    {error && <FText style={styles.errorText}>{error}</FText>}
                     <View style={styles.footer}>
                         <Button mode="outlined" onPress={onBackregistryPrev} style={{ flex: 1, borderColor: Colors.Astronaut[200] }} ><FText style={{color:Colors.Astronaut[200]}}>Voltar</FText></Button>
-                        <Button mode="contained" onPress={handleSavePrev} style={{ flex: 1, backgroundColor: Colors.Astronaut[900] }} >Registrar</Button>
+                        <Button mode="contained" onPress={handleSavePrev} style={{ flex: 1, backgroundColor: Colors.Astronaut[900] }} disabled={loading} >
+                            {loading ? (
+                                <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                            ) : (
+                                "Registrar"
+                            )}
+                        </Button>
                     </View>
+                    </>
                 }>
                 <View style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                     <View style={styles.row}>
@@ -309,8 +418,8 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
                         <Counter value={caffeineAmount} onValueChange={setCaffeineAmount} minValue={0} />
                     </View>
                     <View style={styles.row}>
-                        <FText>Tempo de exercício</FText>
-                        <Counter value={exerciseMinutes} onValueChange={setExerciseMinutes} step={5} minValue={0} label="min" />
+                        <FText>Tempo de tela</FText>
+                        <Counter value={screenTime} onValueChange={setScreenTime} step={5} minValue={0} label="min" />
                     </View>
                 </View>
             </Modalize>
@@ -344,6 +453,8 @@ const styles = StyleSheet.create({
     modalBackdrop: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
     modalContent: { borderRadius: 20, padding: 16, margin: 20, overflow: 'hidden' },
     iosPickerHeader: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 10, borderTopWidth: 1, borderTopColor: '#3A3A3C' },
+    errorText: { color: '#ff8a80', textAlign: 'center', fontFamily: 'Fustat', fontSize: 14, marginBottom: -10, marginTop: 5,
+  },
 });
 
 

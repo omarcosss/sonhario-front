@@ -106,9 +106,9 @@ export default function RegisterScreen() {
             {step === 1 && (
             <View style={styles.formSection}>
               <View style={styles.inputsWrapper}>
-                <Input placeholder='Email' icone='Envelope' value={formData.email} onChangeText={(text) => handleInputChange('email', text)} />
-                <Input placeholder='Senha' icone='Lock' senha value={formData.password} onChangeText={(text) => handleInputChange('password', text)} />
-                <Input placeholder='Confirmar Senha' icone='Lock' senha value={formData.password_confirm} onChangeText={(text) => handleInputChange('password_confirm', text)} />
+                <Input placeholder='Email' icone='Envelope' value={formData.email} onChangeText={(text) => handleInputChange('email', text)} autoCapitalize='none'/>
+                <Input placeholder='Senha' icone='Lock' senha value={formData.password} onChangeText={(text) => handleInputChange('password', text)} autoCapitalize='none'/>
+                <Input placeholder='Confirmar Senha' icone='Lock' senha value={formData.password_confirm} onChangeText={(text) => handleInputChange('password_confirm', text)} autoCapitalize='none'/>
               </View>
               {/* Área de ERRO */}
               {error && <Text style={styles.errorText}>{error}</Text>}
@@ -134,7 +134,7 @@ export default function RegisterScreen() {
             {step === 2 && (
               <View style={styles.formSection}>
                 <View style={styles.inputsWrapper}>
-                  <Input placeholder='Seu Nome' icone='User' value={formData.display_name} onChangeText={(text) => handleInputChange('display_name', text)} />
+                  <Input placeholder='Seu Nome' icone='User' value={formData.display_name} onChangeText={(text) => handleInputChange('display_name', text)} autoCapitalize='words' />
                   <Input placeholder='Gênero' icone='User' value={formData.gender} onChangeText={(text) => handleInputChange('gender', text)} />
                   <Input placeholder='Data de Nascimento' icone='Calendar' value={formData.birthdate} onChangeText={(text) => handleInputChange('birthdate', text)} />
                 </View>
