@@ -6,7 +6,7 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { PlatformPressable } from '@react-navigation/elements';
 import { useLinkBuilder, useTheme } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
-import { Platform, View } from 'react-native';
+import { View } from 'react-native';
 
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -22,7 +22,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   };
 
   return (
-    <View style={{ flexDirection: 'row', paddingLeft: 10, paddingRight: 10, paddingTop: 5, paddingBottom: Platform.OS === 'ios' ? 30 : 10, bottom: 0, backgroundColor: Colors.dark.background, borderTopWidth: 1, borderTopColor: Colors.dark.border }}>
+    <View style={{ flexDirection: 'row', paddingLeft: 10, paddingRight: 10, paddingTop: 5, paddingBottom: 30, bottom: 0, backgroundColor: Colors.dark.background, borderTopWidth: 1, borderTopColor: Colors.dark.border }}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label =

@@ -1,3 +1,4 @@
+import { Colors } from '@/constants/Colors';
 import { AuthContext } from '@/utils/authContext';
 import { Redirect, Stack } from 'expo-router';
 import { useContext } from 'react';
@@ -11,10 +12,17 @@ export default function ProtectedLayout() {
   } 
   return (
     <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)"  options={{ headerShown: false, headerTitle: 'Início' }}  />
+      <Stack.Screen name="entries/index"  options={{ 
+        headerTitle: 'Todos os Registros', 
+        headerStyle: {
+          backgroundColor: '#161616'
+        }, 
+        headerTintColor: Colors.Astronaut[50] 
+      }} />
       <Stack.Screen name="+not-found" />
       <Stack.Screen name="login" options={{ headerShown: false }} />
-       <Stack.Screen name="(editor)" options={{ headerShown: false }} />
+      <Stack.Screen name="(editor)" options={{ headerShown: false }} />
     </Stack>
   );
 }

@@ -7,6 +7,7 @@ import SleepRegistryModals, { SleepPlanData, SleepRegistryModalsRef } from '@/co
 import { Colors } from "@/constants/Colors";
 import { getTokens } from '@/utils/authStorage';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Link } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -75,7 +76,7 @@ export default function HomeScreen() {
                 handleDeficit(deficitData);
                 if (sleepData.length > 0)
                     latestSleepRating(sleepData[0].total_sleep_hours.toFixed(0));
-                setSleepHistory(sleepData.map((entry: any) => ({
+                    setSleepHistory(sleepData.map((entry: any) => ({
                     date: entry.date,
                     hours: entry.total_sleep_hours
                 })));
@@ -131,9 +132,11 @@ export default function HomeScreen() {
                                     <>
                                     <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <FText style={{color: Colors.Astronaut[50]}}>Último Registro:</FText>
-                                        <Button mode="contained" style={{ backgroundColor: Colors.Card.Stroke, backgroundBlendMode: 'multiply', borderWidth: 1, borderColor: Colors.Card.Stroke}}>
-                                            <FText style={{ color: Colors.Astronaut[200]}}>Ver todos</FText>
-                                        </Button>
+                                        <Link href="/entries">
+                                            <Button mode="contained" style={{ backgroundColor: Colors.Card.Stroke, backgroundBlendMode: 'multiply', borderWidth: 1, borderColor: Colors.Card.Stroke}}>
+                                                <FText style={{ color: Colors.Astronaut[200]}}>Ver todos</FText>
+                                            </Button>
+                                        </Link>
                                     </View>
                                     <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                                         <SleepScore iconColor={latestSleepColor[200]} shadowColor={latestSleepColor[600]} shadowRadius={20} />
@@ -147,9 +150,11 @@ export default function HomeScreen() {
                                     <>
                                     <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                                         <FText style={{color: Colors.Astronaut[50]}}>Seus Registros:</FText>
-                                        <Button mode="contained" style={{ backgroundColor: Colors.Card.Stroke, backgroundBlendMode: 'multiply', borderWidth: 1, borderColor: Colors.Card.Stroke}}>
-                                            <FText style={{ color: Colors.Astronaut[200]}}>Ver todos</FText>
-                                        </Button>
+                                        <Link href="/entries">
+                                            <Button mode="contained" style={{ backgroundColor: Colors.Card.Stroke, backgroundBlendMode: 'multiply', borderWidth: 1, borderColor: Colors.Card.Stroke}}>
+                                                <FText style={{ color: Colors.Astronaut[200]}}>Ver todos</FText>
+                                            </Button>
+                                        </Link>
                                     </View>                                    
                                     <FText>Você ainda não fez nenhum registro de sono.</FText>
                                     <FText>Vamos começar hoje?</FText>
