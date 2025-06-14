@@ -1,22 +1,41 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { Feather } from '@expo/vector-icons'; // Biblioteca de ícones do Expo
 import { Colors } from "@/constants/Colors";
+import { Feather } from '@expo/vector-icons'; // Biblioteca de ícones do Expo
+import React from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 // Definimos os tipos das propriedades que nosso card vai receber
 type DreamCardProps = {
   date: string;
-  summary?: string;
-  tags?: { emoji: string; text: string }[];
+  text?: string;
+  emotion?: number;
   onPress: () => void; // Função a ser chamada quando o card for pressionado
 };
 
-export default function DreamCard({ date, summary, tags, onPress }: DreamCardProps) {
+const emotionEmoji = (emotion: number) => {
+  const emojis = [
+    '😊', '😢', '🤨'
+  ]
+
+  return emojis[emotion];
+}
+
+export default function DreamCard({ date, text, emotion, onPress }: DreamCardProps) {
+  function formatDate (inputDate: string) {
+      const date = new Date(`${inputDate}T00:00:00`)
+
+      const formattedDate = date.toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric'
+      });
+      return formattedDate;
+  }
+
   return (
     <Pressable style={styles.card} onPress={onPress}>
       {/* Seção do Cabeçalho: Data e Seta */}
       <View style={styles.header}>
-        <Text style={styles.dateText}>{date}</Text>
+        <Text style={styles.dateText}>{formatDate(date)}</Text>
         <Feather name="chevron-right" size={24} color="#A9A9A9" />
       </View>
 
@@ -26,11 +45,13 @@ export default function DreamCard({ date, summary, tags, onPress }: DreamCardPro
       {/* Seção do Resumo */}
       <View style={styles.content}>
         <Text style={styles.summaryText} numberOfLines={3}>
-          {summary}
+          {text}
         </Text>
       </View>
+      
+      {emotion && <Text style={styles.tagEmoji}>{emotionEmoji(emotion)}</Text>}      
 
-      {/* Seção das Tags */}
+      {/* Seção das Tags
       {tags && tags.length > 0 && (
         <View style={styles.footer}>
           {tags.map((tag, index) => (
@@ -40,7 +61,7 @@ export default function DreamCard({ date, summary, tags, onPress }: DreamCardPro
             </View>
           ))}
         </View>
-      )}
+      )} */}
     </Pressable>
   );
 }

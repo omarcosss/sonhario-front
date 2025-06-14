@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, Alert } from 'react-native';
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { getDreamById, Dream } from '@/app/dreamService'; // Reutilizamos o serviço
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+// import { getDreamById, Dream } from '@/app/dreamService'; // Reutilizamos o serviço
 import { Colors } from '@/constants/Colors';
 
 export default function DreamViewScreen() {
@@ -11,17 +11,17 @@ export default function DreamViewScreen() {
 
   const [dream, setDream] = useState<Dream | null>(null);
 
-  useEffect(() => {
-    if (typeof id === 'string') {
-      const foundDream = getDreamById(id);
-      if (foundDream) {
-        setDream(foundDream); 
-      } else {
-        Alert.alert("Erro", "Sonho não encontrado.");
-        router.back();
-      }
-    }
-  }, [id]);
+  // useEffect(() => {
+  //   if (typeof id === 'string') {
+  //     const foundDream = getDreamById(id);
+  //     if (foundDream) {
+  //       setDream(foundDream); 
+  //     } else {
+  //       Alert.alert("Erro", "Sonho não encontrado.");
+  //       router.back();
+  //     }
+  //   }
+  // }, [id]);
 
   // 1. FUNÇÃO PARA NAVEGAR PARA A TELA DE EDIÇÃO
   const handleEditPress = () => {
