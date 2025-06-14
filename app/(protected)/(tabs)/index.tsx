@@ -76,7 +76,7 @@ export default function HomeScreen() {
                 handleDeficit(deficitData);
                 if (sleepData.length > 0)
                     latestSleepRating(sleepData[0].total_sleep_hours.toFixed(0));
-                setSleepHistory(sleepData.map((entry: any) => ({
+                    setSleepHistory(sleepData.map((entry: any) => ({
                     date: entry.date,
                     hours: entry.total_sleep_hours
                 })));
