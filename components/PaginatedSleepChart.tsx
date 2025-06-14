@@ -72,7 +72,6 @@ const RoundedBar: FC<RoundedBarProps> = ({ width, height, x, y, color, onPress }
 
 const PaginatedSleepChart: FC<PaginatedSleepChartProps> = ({ sleepData }) => {
   // --- STATE ---
-  // New state to manage the end date of the 7-day window being displayed
   const [endDate, setEndDate] = useState(new Date());
   const [processedData, setProcessedData] = useState<ProcessedSleepRecord[]>([]);
   const [maxSleepHours, setMaxSleepHours] = useState<number>(1);
@@ -84,18 +83,18 @@ const PaginatedSleepChart: FC<PaginatedSleepChartProps> = ({ sleepData }) => {
   const barWidth = 30;
   const barMargin = 10;
   const totalChartWidth = (barWidth + barMargin) * 7 - barMargin;
+  // --- FIX: This constant estimates the vertical offset caused by the navigation header ---
+  const NAVIGATION_HEADER_OFFSET = 55; // Calculated from navButton height (35) + navigationContainer marginBottom (20)
 
   // --- HANDLERS & HELPERS ---
 
-  // Navigate to the previous 7-day period
   const handlePreviousWeek = () => {
     const newEndDate = new Date(endDate);
     newEndDate.setDate(newEndDate.getDate() - 7);
     setEndDate(newEndDate);
-    setTooltip(null); // Hide tooltip when changing weeks
+    setTooltip(null);
   };
 
-  // Check if the next week would be in the future
   const isNextWeekDisabled = () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -104,28 +103,22 @@ const PaginatedSleepChart: FC<PaginatedSleepChartProps> = ({ sleepData }) => {
       return end >= today;
   };
 
-  // Navigate to the next 7-day period
   const handleNextWeek = () => {
     if (isNextWeekDisabled()) return;
-
     const newEndDate = new Date(endDate);
     newEndDate.setDate(newEndDate.getDate() + 7);
-
-    // If the new end date is past today, just set it to today
     if (newEndDate > new Date()) {
       setEndDate(new Date());
     } else {
       setEndDate(newEndDate);
     }
-    setTooltip(null); // Hide tooltip
+    setTooltip(null);
   };
 
-  // Format the date range string for the header
   const formatDateRange = () => {
     const end = endDate;
     const start = new Date(endDate);
     start.setDate(start.getDate() - 6);
-
     const formatDate = (d: Date) => {
       const day = String(d.getDate()).padStart(2, '0');
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -135,10 +128,14 @@ const PaginatedSleepChart: FC<PaginatedSleepChartProps> = ({ sleepData }) => {
   };
 
   const handleBarPress = (dayData: ProcessedSleepRecord, xPosition: number, yPosition: number) => {
-    const tooltipTop = yPosition - 60; // Position tooltip above the bar
+    // --- FIX: Adjust tooltip's vertical position to account for the navigation header ---
+    // The tooltip's 'top' is relative to the main container. We add the header offset to the bar's
+    // yPosition to get the bar's absolute top, then subtract 60 to place the tooltip above the bar.
+    const tooltipTop = yPosition + NAVIGATION_HEADER_OFFSET - 60;
+
     setTooltip({
       visible: true,
-      x: xPosition - 7.5, // Center tooltip relative to the bar
+      x: xPosition + 12.5, // Center tooltip relative to the bar
       y: tooltipTop,
       day: dayData.day,
       hours: dayData.hours,
@@ -152,31 +149,24 @@ const PaginatedSleepChart: FC<PaginatedSleepChartProps> = ({ sleepData }) => {
 
   // --- DATA PROCESSING EFFECT ---
   useEffect(() => {
-    // 1. Generate the 7 days leading up to the current `endDate`
     const weekMeta: { dateString: string; dayName: DayOfWeek }[] = [];
     const weekEndDate = new Date(endDate);
-
     for (let i = 6; i >= 0; i--) {
       const date = new Date(weekEndDate);
       date.setDate(weekEndDate.getDate() - i);
-
-      // Format date to 'YYYY-MM-DD' for reliable matching
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const dateString = `${year}-${month}-${day}`;
-
       const dayName = dayAbbreviations[date.getDay()];
       weekMeta.push({ dateString, dayName });
     }
 
-    // 2. Process the incoming sleep data against the generated week
     let maxHours = 0;
     const currentWeekData: ProcessedSleepRecord[] = weekMeta.map(meta => {
       const foundDay = sleepData?.find(
         (d): d is SleepRecord => d !== null && d !== undefined && d.date === meta.dateString
       );
-
       const hours = foundDay ? foundDay.hours : 0;
       if (hours > maxHours) {
         maxHours = hours;
@@ -184,10 +174,9 @@ const PaginatedSleepChart: FC<PaginatedSleepChartProps> = ({ sleepData }) => {
       return { day: meta.dayName, hours, date: meta.dateString };
     });
 
-    setMaxSleepHours(maxHours > 0 ? maxHours : 1); // Avoid division by zero
+    setMaxSleepHours(maxHours > 0 ? maxHours : 1);
     setProcessedData(currentWeekData);
-
-  }, [sleepData, endDate]); // Re-run when data or the selected week changes
+  }, [sleepData, endDate]);
 
   // --- RENDER ---
   if (!processedData.length) {
@@ -197,7 +186,7 @@ const PaginatedSleepChart: FC<PaginatedSleepChartProps> = ({ sleepData }) => {
   return (
     <TouchableWithoutFeedback onPress={handleOutsidePress}>
       <View style={styles.container}>
-        {/* --- NEW: Navigation Header --- */}
+        {/* --- Navigation Header --- */}
         <View style={styles.navigationContainer}>
           <TouchableOpacity onPress={handlePreviousWeek} style={styles.navButton}>
             <Chevron />
@@ -225,14 +214,12 @@ const PaginatedSleepChart: FC<PaginatedSleepChartProps> = ({ sleepData }) => {
               const xPosition = index * (barWidth + barMargin);
               const yPosition = chartHeight - barHeight;
 
-              // Render a small dot for days with zero hours
               if (dayData.hours === 0 || barHeight <= 0) {
                 return (
                   <Rect key={`${dayData.date}-empty`} x={xPosition + (barWidth / 2) - 1} y={chartHeight - 2} width={2} height={2} fill="#555F7C" onPress={() => handleBarPress(dayData, xPosition, chartHeight - 2)}/>
                 );
               }
 
-              // Render the rounded bar for days with sleep data
               return (
                 <RoundedBar key={dayData.date} x={xPosition} y={yPosition - 3} width={barWidth} height={barHeight} color="#4767C926" onPress={() => handleBarPress(dayData, xPosition, yPosition - 3)}/>
               );
@@ -270,7 +257,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 16,
   },
-  // --- NEW: Navigation Styles ---
   navigationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -299,7 +285,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
-  // --- Chart & Label Styles ---
   chartArea: {
     height: 130,
     marginBottom: 10,
@@ -320,7 +305,6 @@ const styles = StyleSheet.create({
     color: '#A0A8C4',
     padding: 20,
   },
-  // --- Tooltip Styles ---
   tooltip: {
     position: 'absolute',
     backgroundColor: '#FFFFFF',
