@@ -1,20 +1,20 @@
-import { Colors } from "@/constants/Colors";
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { ActivityIndicator, Modal, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
-import ModalRN from 'react-native-modal';
-import { Modalize } from 'react-native-modalize';
-import { Button, Divider } from 'react-native-paper';
-import { Portal } from 'react-native-portalize';
-
 import InsightIcon from "@/assets/icons/InsightIcon";
 import Readiness from '@/assets/icons/Readiness';
 import SleepScore from '@/assets/icons/SleepScore';
 import Counter from '@/components/Counter';
 import FText from '@/components/FText';
 import { QualityChip } from '@/components/QualityChip';
+import { Colors } from "@/constants/Colors";
 import { getTokens } from "@/utils/authStorage";
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { BlurView } from "expo-blur";
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import { ActivityIndicator, Modal, Platform, Pressable, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import ModalRN from 'react-native-modal';
+import { Modalize } from 'react-native-modalize';
+import { Button, Divider, SegmentedButtons } from 'react-native-paper';
+import { Portal } from 'react-native-portalize';
+
 
 
 export interface SleepPlanData {
@@ -83,10 +83,17 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
 
         const [insightResults, setInsightResults] = useState<any>(null);
 
+        const [entryId, setEntryId] = useState<number>();
+        const [dreamDescription, setDreamDescription] = useState<string>();
+        const [emotion, setEmotion] = useState<string>('1');
+
         const registryTypeSelectRef = useRef<Modalize>(null);
         const registryPlan1Ref = useRef<Modalize>(null);
         const registryPlanPredictionRef = useRef<Modalize>(null);
         const registryPrevRef = useRef<Modalize>(null);
+        const registryPrevDreamRef = useRef<Modalize>(null);
+
+
        
         useImperativeHandle(ref, () => ({
         open: () => {
@@ -119,7 +126,11 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
                     setError(data.error || 'Ocorreu um erro inesperado.');
                 } else {
                     success = true;
-                    if (insight) setInsightResults(data.data);
+                    if (insight) {
+                        setInsightResults(data.data);
+                    } else {
+                        setEntryId(data.id);
+                    }
                 }
             } catch (e) {
                 console.error(e);
@@ -172,6 +183,16 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
         };
         const onCloseregistryPrev = () => registryPrevRef.current?.close();
 
+        const onOpenregistryPrevDream = () => {
+            handleConfirmSavePrev()
+            registryPrevDreamRef.current?.open();
+        }
+
+        const onCloseRegistryPrevDream = () => {
+            registryPrevDreamRef.current?.close();
+
+        }
+
         const handleSavePlan = () => {
             handleEntryPost(false).then((response) => {
                 if (response) {
@@ -215,12 +236,39 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
             setShowConfirmPrev(false);
         };
 
-        const handleAddDream = () => {
-            //nada ainda
-        }
+        const handleAddDream = async () => {
+            setLoading(true);
+            setError(null);
+            let success = false;
+            try {
+                const { accessToken } = await getTokens();
+                const response = await fetch(process.env.EXPO_PUBLIC_API_URL + (`/entries/${entryId}/dream/`) , {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        text: dreamDescription,
+                        emotion: emotion,
+                    }),
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    setError(data.error || 'Ocorreu um erro inesperado.');
+                } else {
+                    success = true;
+                }
+            } catch (e) {
+                console.error(e);
+                setError('Não foi possível conectar ao servidor. Tente novamente.');
+            } finally {
+                setLoading(false);
+                return success;
+            }
+        };
 
 
-        // DateTimePicker change handler
         const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
             if (Platform.OS === 'android') setShowPicker(false);
             if (selectedDate) {
@@ -382,7 +430,7 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
                     <>
                     {error && <FText style={styles.errorText}>{error}</FText>}
                     <View style={styles.footer}>
-                        <Button mode="outlined" onPress={onBackregistryPrev} style={{ flex: 1, borderColor: Colors.Astronaut[200] }} ><FText style={{color:Colors.Astronaut[200]}}>Voltar</FText></Button>
+                        <Button mode="outlined" onPress={onBackregistryPrev} style={{ flex: 1, borderColor: Colors.Astronaut[200] }} ><FText style={{color:Colors.Astronaut[200]}}>Cancelar</FText></Button>
                         <Button mode="contained" onPress={handleSavePrev} style={{ flex: 1, backgroundColor: Colors.Astronaut[900] }} disabled={loading} >
                             {loading ? (
                                 <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
@@ -423,17 +471,61 @@ const SleepRegistryModals = forwardRef<SleepRegistryModalsRef, SleepRegistryModa
                     </View>
                 </View>
             </Modalize>
+            
 
             <ModalRN isVisible={showConfirmPrev} animationIn={'zoomIn'} animationOut={'zoomOut'}>
                 <View style={{ backgroundColor: '#131623', borderColor: Colors.Card.Stroke, borderWidth: 1, borderRadius: 40, padding: 20, display: 'flex', flexDirection: 'column', gap: 30, alignItems: 'center' }}>
                     <FText style={{ marginTop: 10, }}>Seu sono está planejado! Lembre-se de confirmar ou ajustar os horários reais ao acordar.</FText>
                     <View style={{ display: 'flex', flexDirection: 'row', gap: 20, width: '100%' }}>
                         <TouchableOpacity onPress={handleConfirmSavePrev} style={{ borderColor: Colors.Astronaut[900], borderWidth: 1, height: 50, display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: 50, flex: 1 }}><FText>Fechar</FText></TouchableOpacity>
-                        <TouchableOpacity onPress={handleConfirmSavePrev} style={{ backgroundColor: Colors.Astronaut[900], height: 50, display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: 50, flex: 1 }}><FText>Registrar Sonho</FText></TouchableOpacity>
+                        <TouchableOpacity onPress={onOpenregistryPrevDream} style={{ backgroundColor: Colors.Astronaut[900], height: 50, display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: 50, flex: 1 }}><FText>Registrar Sonho</FText></TouchableOpacity>
                     </View>
                     
                 </View>
             </ModalRN>
+
+            <Modalize ref={registryPrevDreamRef} {...modalizeOptions}
+                FooterComponent={
+                    <>
+                    {error && <FText style={styles.errorText}>{error}</FText>}
+                    <View style={styles.footer}>
+                        <Button mode="outlined" onPress={onCloseRegistryPrevDream} style={{ flex: 1, borderColor: Colors.Astronaut[200] }} ><FText style={{color:Colors.Astronaut[200]}}>Voltar</FText></Button>
+                        <Button mode="contained" onPress={handleAddDream} style={{ flex: 1, backgroundColor: Colors.Astronaut[900] }} disabled={loading} >
+                            {loading ? (
+                                <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                            ) : (
+                                "Registrar"
+                            )}
+                        </Button>
+                    </View>
+                    </>
+                }>
+                <View style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                    <FText>Descreva o seu sonho</FText>
+                    <TextInput 
+                        placeholder='Hoje eu sonhei que...' 
+                        value={dreamDescription}
+                        onChangeText={setDreamDescription}
+                        autoCapitalize='none'
+                        style={{backgroundColor: Colors.Card.Background, height: 200, display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', padding: 12, textAlign: 'left', textAlignVertical: 'top', borderRadius: 15, color: Colors.Astronaut[50]}}
+                    />
+                    <SegmentedButtons
+                        value={emotion}
+                        onValueChange={setEmotion}
+                        buttons={[
+                            {
+                                value: '1',
+                                label: '😊',
+                            },
+                            {
+                                value: '2',
+                                label: '😢',
+                            },
+                            { value: '3', label: '🤨' },
+                        ]}
+                    />
+                </View>
+            </Modalize>
         </Portal>
         );
     }
