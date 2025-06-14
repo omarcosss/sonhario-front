@@ -24,7 +24,7 @@ export default function HomeScreen() {
 
     const [profile, setProfile] = useState<any>();
     const [sleepHistory, setSleepHistory] = useState<(SleepEntry | null | undefined)[] | undefined>(undefined);
-    const [latestSleep, setLatestSleep] = useState<number>();
+    const [latestSleep, setLatestSleep] = useState<number>(0);
     const [latestSleepRating, setLatestSleepRating] = useState<string>();
     const [latestSleepColor, setLatestSleepColor] = useState<any>();
     const [deficit, setDeficit] = useState<any>();
@@ -73,7 +73,8 @@ export default function HomeScreen() {
 
                 setProfile(profileData);
                 handleDeficit(deficitData);
-                latestSleepRating(sleepData[0].total_sleep_hours.toFixed(0));
+                if (sleepData.length > 0)
+                    latestSleepRating(sleepData[0].total_sleep_hours.toFixed(0));
                 setSleepHistory(sleepData.map((entry: any) => ({
                     date: entry.date,
                     hours: entry.total_sleep_hours
@@ -118,6 +119,7 @@ export default function HomeScreen() {
         <>
             <LinearGradient colors={['rgba(0, 0, 0, 0.00)', 'rgba(50, 64, 123, 0.40)']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.gradient}>
                 <ScrollView style={{ flex: 1, paddingTop: 20 }} bounces={false}>
+                    {error && <FText style={styles.errorText}>{error}</FText>}
                     {loading && !error ? (
                         <ActivityIndicator style={{marginTop: 420}} size="large" color={Colors.Astronaut[100]} />
                     ) : (
@@ -233,5 +235,13 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.Card.Stroke,
         backgroundColor: Colors.Astronaut[900]
-    }
+    },
+    errorText: {
+        color: '#ff8a80',
+        textAlign: 'center',
+        fontFamily: 'Fustat',
+        fontSize: 14,
+        marginTop: -10,
+        marginBottom: 5,
+    },
 });

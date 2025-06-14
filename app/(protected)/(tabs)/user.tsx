@@ -1,9 +1,11 @@
-import { ThemedText } from "@/components/ThemedText";
-import { LinearGradient } from 'expo-linear-gradient';
-import { Platform, StyleSheet, View, Text, Pressable } from "react-native";
-import { IconUserCircle, IconSecurity, IconSettings, IconNotification, IconUserEdit, IconHelp, IconLogout } from '@/assets/icons';// Seus ícones
-import { Feather } from '@expo/vector-icons'; // Para o ícone de seta
+import { IconHelp, IconLogout, IconNotification, IconSecurity, IconSettings, IconUserCircle, IconUserEdit } from '@/assets/icons'; // Seus ícones
 import { Colors } from '@/constants/Colors';
+import { AuthContext } from '@/utils/authContext';
+import { getTokens } from '@/utils/authStorage';
+import { Feather } from '@expo/vector-icons'; // Para o ícone de seta
+import { LinearGradient } from 'expo-linear-gradient';
+import { useContext, useEffect, useState } from "react";
+import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 // Componente reutilizável para cada item do menu
 type ProfileMenuItemProps = {
@@ -23,9 +25,56 @@ const ProfileMenuItem = ({ icon, label, onPress }: ProfileMenuItemProps) => (
 );
 
 export default function UserProfile() {
+    const authContext = useContext(AuthContext);
+
+    const [error, setError] = useState<string | null>('');
+    const [loading, setLoading] = useState<boolean>(true);
+    const [refresh, setRefresh] = useState<boolean>(false);
+
+    const [profile, setProfile] = useState<any>();
+
+    useEffect(() => {
+        setLoading(true);
+        setError(null);
+
+        const fetchPageData = async () => {
+            try {
+                const { accessToken } = await getTokens();
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                };
+
+                const [profileResponse] = await Promise.all([
+                    fetch(process.env.EXPO_PUBLIC_API_URL + '/profile/', {
+                        method: 'GET', headers
+                    }),
+                ]);
+                if (!profileResponse.ok) {
+                    throw new Error('Falha em uma das requisições à API.');
+                }
+                const [profileData] = await Promise.all([
+                    profileResponse.json(),
+                ]);
+
+                setProfile(profileData);
+            } catch (e) {
+                console.error(e);
+                setError('Não foi possível conectar ao servidor. Tente novamente.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPageData();
+    }, [refresh]);
+
     // Funções de clique (por enquanto, apenas um log)
-    const handlePress = (action: string) => {
+    const handlePress = async (action: string) => {
         console.log(`Ação: ${action}`);
+        if (action == "Sair") {
+            await authContext.logOut();
+        }
     };
 
     return (
@@ -36,50 +85,55 @@ export default function UserProfile() {
                 end={{ x: 0.5, y: 1 }}
                 style={styles.gradient}
             >
-                {/* Seção de Informações do Usuário */}
-                <View style={styles.profileHeader}>
-                    <View style={styles.avatarContainer}>
-                        <IconUserCircle width={48} height={48} color={Colors.Astronaut[400]} />
+                {error && <Text style={styles.errorText}>{error}</Text>}
+                {loading && !error ? (
+                    <ActivityIndicator style={{marginTop: 420}} size="large" color={Colors.Astronaut[100]} />
+                ) : (
+                    <>
+                    {/* Seção de Informações do Usuário */}
+                    <View style={styles.profileHeader}>
+                        <View style={styles.avatarContainer}>
+                            <IconUserCircle width={48} height={48} color={Colors.Astronaut[400]} />
+                        </View>
+                        <Text style={styles.userName}>{profile.display_name}</Text>
+                        <Text style={styles.userAge}>Idade: {profile.age}</Text>
                     </View>
-                    <Text style={styles.userName}>Aurelia Kincaid</Text>
-                    <Text style={styles.userAge}>Idade</Text>
-                </View>
 
-                {/* Seção de Configurações */}
-                <View style={styles.menuSection}>
-                    <Text style={styles.sectionTitle}>Configurações</Text>
-                    <ProfileMenuItem 
-                        icon={<IconSecurity width={24} height={24} color={Colors.Astronaut[50]} />} 
-                        label="Segurança da Conta"
-                        onPress={() => handlePress('Segurança')} 
-                    />
-                    <ProfileMenuItem 
-                        icon={<IconSettings width={24} height={24} color={Colors.Astronaut[50]}/>} 
-                        label="Ajustes" 
-                        onPress={() => handlePress('Ajustes')}
-                    />
-                    <ProfileMenuItem 
-                        icon={<IconNotification width={24} height={24} color={Colors.Astronaut[50]} />} 
-                        label="Notificações" 
-                        onPress={() => handlePress('Notificações')}
-                    />
-                    <ProfileMenuItem 
-                        icon={<IconUserEdit width={24} height={24} color={Colors.Astronaut[50]}/>} 
-                        label="Editar minhas informações" 
-                        onPress={() => handlePress('Editar Informações')}
-                    />
-                    <ProfileMenuItem 
-                        icon={<IconHelp width={24} height={24} color={Colors.Astronaut[50]}/>} 
-                        label="Ajuda" 
-                        onPress={() => handlePress('Ajuda')}
-                    />
-                     <ProfileMenuItem 
-                        icon={<IconLogout width={24} height={24} color={Colors.Astronaut[50]}/>} 
-                        label="Sair" 
-                        onPress={() => handlePress('Sair')}
-                    />
-                </View>
-                
+                    {/* Seção de Configurações */}
+                    <View style={styles.menuSection}>
+                        <Text style={styles.sectionTitle}>Configurações</Text>
+                        <ProfileMenuItem 
+                            icon={<IconSecurity width={24} height={24} color={Colors.Astronaut[50]} />} 
+                            label="Segurança da Conta"
+                            onPress={() => handlePress('Segurança')} 
+                        />
+                        <ProfileMenuItem 
+                            icon={<IconSettings width={24} height={24} color={Colors.Astronaut[50]}/>} 
+                            label="Ajustes" 
+                            onPress={() => handlePress('Ajustes')}
+                        />
+                        <ProfileMenuItem 
+                            icon={<IconNotification width={24} height={24} color={Colors.Astronaut[50]} />} 
+                            label="Notificações" 
+                            onPress={() => handlePress('Notificações')}
+                        />
+                        <ProfileMenuItem 
+                            icon={<IconUserEdit width={24} height={24} color={Colors.Astronaut[50]}/>} 
+                            label="Editar minhas informações" 
+                            onPress={() => handlePress('Editar Informações')}
+                        />
+                        <ProfileMenuItem 
+                            icon={<IconHelp width={24} height={24} color={Colors.Astronaut[50]}/>} 
+                            label="Ajuda" 
+                            onPress={() => handlePress('Ajuda')}
+                        />
+                        <ProfileMenuItem 
+                            icon={<IconLogout width={24} height={24} color={Colors.Astronaut[50]}/>} 
+                            label="Sair" 
+                            onPress={() => handlePress('Sair')}
+                        />
+                    </View>
+                </>)}                
             </LinearGradient>
         </View>
     );
@@ -150,5 +204,13 @@ const styles = StyleSheet.create({
         fontSize: 17,
         color: Colors.Astronaut[50],
         fontFamily: 'Fustast'
+    },
+    errorText: {
+        color: '#ff8a80',
+        textAlign: 'center',
+        fontFamily: 'Fustat',
+        fontSize: 14,
+        marginTop: -10,
+        marginBottom: 5,
     },
 });

@@ -78,6 +78,7 @@ export default function LoginScreen() {
                 senha 
                 value={password}
                 onChangeText={setPassword}
+                autoCapitalize='none'
             />
           </View>
 
