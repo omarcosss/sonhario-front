@@ -91,7 +91,7 @@ export default function HomeScreen() {
         const latestSleepRating = (hours: number) => {
             setLatestSleep(hours);
 
-            let rating = "Você teve uma noite de sono moderada. Observe seus hábitos diaramente para obter melhorias."
+        let rating = "Você teve uma noite de sono moderada. Observe seus hábitos diaramente para obter melhorias."
             if (hours > 6)
                 rating = "Você teve uma ótima noite de sono! Isso ajuda a manter sua concentração e energia ao longo do dia."
             if (hours < 5)

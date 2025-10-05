@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "sonhario-front",
+    "name": "Sonhario",
     "slug": "sonhario-front",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,15 +14,15 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#131834"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.bunnysammy.sonhariofront"
+      "package": "com.bunnysammy.sonhario"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.svg"
     },
     "plugins": [
       "expo-router",
@@ -32,10 +32,11 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#131834"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
