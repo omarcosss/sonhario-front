@@ -6,13 +6,13 @@
       },
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://your-staging-api-url.com"
+        "EXPO_PUBLIC_API_URL": "https://api-sonhario.onrender.com"
       }
     },
     "production": {
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://your-staging-api-url.com"
+        "EXPO_PUBLIC_API_URL": "https://api-sonhario.onrender.com"
       }
     }
   }
