@@ -8,7 +8,7 @@ import 'react-native-reanimated';
 export default function ProtectedLayout() {
   const authContext = useContext(AuthContext);
   if (!authContext.isLoggedIn){
-    return <Redirect href={'/login'} />
+    return <Redirect href={'/prelogin'} />
   } 
   return (
     <Stack>
@@ -21,7 +21,7 @@ export default function ProtectedLayout() {
         headerTintColor: Colors.Astronaut[50] 
       }} />
       <Stack.Screen name="+not-found" />
-      <Stack.Screen name="login" options={{ headerShown: false }} />
+      <Stack.Screen name="prelogin" options={{ headerShown: false }} />
       <Stack.Screen name="(editor)" options={{ headerShown: false }} />
     </Stack>
   );

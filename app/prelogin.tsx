@@ -7,11 +7,9 @@ import { useContext, useState } from 'react';
 import { ActivityIndicator, Image, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
-export default function LoginScreen() {
+export default function PreloginScreen() {
 
-  const { email: emailParam } = useLocalSearchParams<{ email?: string }>();
-  const [email, setEmail] = useState(emailParam || '');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { success } = useLocalSearchParams();
@@ -19,32 +17,37 @@ export default function LoginScreen() {
   const authContext = useContext(AuthContext);
   const router = useRouter();
 
-  const toRegister = () => {
-    router.push('/register');
-  }
-  const toForgotPassword = () => {
-    router.push('/forgot_password')
-  }
+  const toLogin = (email: string="") => {
+    router.push({ pathname: "/login", params: { email } });
+  };
 
-  const handleLogin = async () => {
+  const toRegister = (email: string="") => {
+    router.push({ pathname: "/register", params: { email } });
+  };
+
+  const handleRegisterCheck = async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(process.env.EXPO_PUBLIC_API_URL + '/token/', {
+            const response = await fetch(process.env.EXPO_PUBLIC_API_URL + '/register/check/', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'},
                 body: JSON.stringify({
                   email: email,
-                  password: password }),
+                  password: '1234'
+                }),
             });
             const data = await response.json();
+            console.log(data);
             if (!response.ok) {
-                setError(data.detail || 'Email ou senha inválidos.');
+                if (data.error == "Este email já está em uso") {
+                  toLogin(email);
+                } else {
+                  setError(data.error || 'Email ou senha inválidos.');
+                }
             } else {
-                const { access, refresh } = data;
-                await authContext.logIn(access, refresh);
-                router.replace('/');
+                toRegister(email);
             }
         } catch (e) {
             console.error(e);
@@ -73,23 +76,18 @@ export default function LoginScreen() {
                 onChangeText={setEmail}
                 autoCapitalize='none'
             />
-            <Input 
-                placeholder='Senha' 
-                icone='Lock' 
-                senha 
-                value={password}
-                onChangeText={setPassword}
-                autoCapitalize='none'
-            />
           </View>
 
-          {/* Área de ESQUECEU SENHA*/}
-          <View style={styles.signupContainer}>
-            <Pressable onPress={toForgotPassword}>
-              <Text style={styles.linkText}>
-                Esqueci minha senha
+          {/* ÁREA DO LINK DE CADASTRO */}
+          <View style={styles.signupRow}>
+            <Text style={styles.regularText}>
+              Não tem uma conta?{' '}
               </Text>
-            </Pressable>
+              <Pressable onPress={()=>toRegister()}>
+                <Text style={styles.linkText}>
+                  Cadastre-se
+                </Text>
+              </Pressable>
           </View>
 
           {/* Área de ERRO */}
@@ -101,24 +99,13 @@ export default function LoginScreen() {
 
           {/* --- BOTÃO DE ENTRAR --- */}
           <View id={'view entrar/cadastro'} style={styles.containerRegister} >
-              <Pressable style={styles.button} onPress={handleLogin} disabled={loading}>
+              <Pressable style={styles.button} onPress={handleRegisterCheck} disabled={loading}>
                   {loading ? (
                       <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
                   ) : (
-                      <Text style={styles.buttonText}>ENTRAR</Text>
+                      <Text style={styles.buttonText}>CONTINUAR</Text>
                   )}
               </Pressable>
-            {/* ÁREA DO LINK DE CADASTRO */}
-            <View style={styles.signupRow}>
-              <Text style={styles.regularText}>
-                Não tem uma conta?{' '}
-                </Text>
-                <Pressable onPress={toRegister}>
-                  <Text style={styles.linkText}>
-                    Cadastre-se
-                  </Text>
-                </Pressable>
-            </View>
 
           </View>
         </View>
@@ -147,6 +134,7 @@ const styles = StyleSheet.create({
   },
   containerRegister:{
     width: '100%',
+    marginTop: 48,
     gap: 24,
     alignItems: 'center',
   },
@@ -154,7 +142,7 @@ const styles = StyleSheet.create({
     width: '100%', // Faz o container dos inputs ocupar toda a largura
     maxWidth: 500,
     gap: 20, // Adiciona um espaçamento de 20px ENTRE os inputs
-    marginBottom: -55,
+    marginBottom: -30,
   },
    signupContainer: {
     marginTop: 20, // Adiciona um espaço acima do texto
@@ -177,16 +165,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Fustat',
     fontSize: 14,
-    marginTop: -10,
-    marginBottom: 5,
+    marginBottom: -20,
   },
   successText: {
     color: '#00C785',
     textAlign: 'center',
     fontFamily: 'Fustat',
     fontSize: 14,
-    marginTop: -10,
-    marginBottom: 5,
+    marginBottom: -20,
   },
   button: {
     backgroundColor: Colors.Astronaut[900], // Usando uma cor do seu tema
@@ -196,7 +182,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 2,
+    marginTop: -50,
 
   },
    buttonText: {
