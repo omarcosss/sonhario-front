@@ -1,13 +1,14 @@
 import Input from '@/components/InputLogin';
 import { Colors } from "@/constants/Colors";
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { email: emailParam } = useLocalSearchParams<{ email?: string }>();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +19,7 @@ export default function RegisterScreen() {
   // 2. ESTADO ÚNICO PARA GUARDAR TODOS OS DADOS DO FORMULÁRIO
   const [formData, setFormData] = useState({
     display_name: '',
-    email: '',
+    email: emailParam || '',
     password: '',
     password_confirm: '',
     birthdate: '',
