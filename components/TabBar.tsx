@@ -6,6 +6,7 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { PlatformPressable } from '@react-navigation/elements';
 import { useLinkBuilder, useTheme } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
+import React from 'react';
 import { View } from 'react-native';
 
 

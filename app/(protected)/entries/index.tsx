@@ -5,7 +5,7 @@ import PaginatedSleepChart from "@/components/PaginatedSleepChart";
 import { Colors } from "@/constants/Colors";
 import { getTokens } from "@/utils/authStorage";
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { ActivityIndicator, Surface } from "react-native-paper";

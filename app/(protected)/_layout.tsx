@@ -1,7 +1,7 @@
 import { Colors } from '@/constants/Colors';
 import { AuthContext } from '@/utils/authContext';
 import { Redirect, Stack } from 'expo-router';
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import 'react-native-reanimated';
 
 
@@ -15,6 +15,13 @@ export default function ProtectedLayout() {
       <Stack.Screen name="(tabs)"  options={{ headerShown: false, headerTitle: 'Início' }}  />
       <Stack.Screen name="entries/index"  options={{ 
         headerTitle: 'Todos os Registros', 
+        headerStyle: {
+          backgroundColor: '#161616'
+        }, 
+        headerTintColor: Colors.Astronaut[50] 
+      }} />
+      <Stack.Screen name="entries/register"  options={{ 
+        headerTitle: 'Novo Sono', 
         headerStyle: {
           backgroundColor: '#161616'
         }, 

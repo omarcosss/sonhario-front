@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import React, { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
 // Importe as funções do seu novo módulo de armazenamento seguro
 import { deleteTokens, getTokens, saveTokens } from './authStorage';
 

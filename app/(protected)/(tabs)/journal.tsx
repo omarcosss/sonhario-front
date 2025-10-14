@@ -6,7 +6,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 // import { getDreams } from '@/app/dreamService';
 import { Colors } from '@/constants/Colors';
 import { getTokens } from '@/utils/authStorage';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default function JournalScreen() {
   // const dreams = getDreams();
