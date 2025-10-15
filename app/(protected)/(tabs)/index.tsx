@@ -10,10 +10,11 @@ import SleepChart from "@/components/SleepChart";
 import { Colors } from "@/constants/Colors";
 import { getTokens } from "@/utils/authStorage";
 import { LinearGradient } from "expo-linear-gradient";
-import { Link, RelativePathString } from "expo-router";
+import { Link, RelativePathString, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { ScrollView, StatusBar, StyleSheet, View } from "react-native";
 import { ActivityIndicator, Button, Surface } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface SleepEntry {
     date: string;
@@ -24,6 +25,7 @@ export default function HomeScreen() {
     const [error, setError] = useState<string | null>("");
     const [loading, setLoading] = useState<boolean>(true);
     const [refresh, setRefresh] = useState<boolean>(false);
+    const router = useRouter();
 
     const [profile, setProfile] = useState<any>();
     const [sleepHistory, setSleepHistory] = useState<
@@ -33,6 +35,13 @@ export default function HomeScreen() {
     const [latestSleepRating, setLatestSleepRating] = useState<string>();
     const [latestSleepColor, setLatestSleepColor] = useState<any>();
     const [deficit, setDeficit] = useState<any>();
+
+    function addSleep(){
+        router.push('../entries/register' as RelativePathString);
+    }
+    function allEntries() {
+        router.push('../entries/' as RelativePathString);
+    }
 
     // const sleepRegistryRef = useRef<SleepRegistrySheetRef>(null);
 
@@ -142,200 +151,192 @@ export default function HomeScreen() {
                     color={Colors.Astronaut[100]}
                 />
             ) : (
-                <>
-                    <Greeting first_name={profile.first_name} />
-                    <View style={styles.container}>
-                        <Surface style={styles.surfaceCard} elevation={4}>
-                            {sleepHistory && sleepHistory.length > 0 ? (
-                                <>
-                                    <View
-                                        style={{
-                                            display: "flex",
-                                            flexDirection: "row",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <FText
-                                            style={{
-                                                color: Colors.Astronaut[50],
-                                            }}
-                                        >
-                                            Último Registro:
-                                        </FText>
-                                        <Link href={"/entries" as RelativePathString}>
-                                            <Button
-                                                mode="contained"
-                                                style={{
-                                                    backgroundColor: Colors.Card.Stroke,
-                                                    backgroundBlendMode: "multiply",
-                                                    borderWidth: 1,
-                                                    borderColor: Colors.Card.Stroke,
-                                                }}
-                                            >
-                                                <FText
-                                                    style={{
-                                                        color: Colors.Astronaut[200],
-                                                    }}
-                                                >
-                                                    Ver todos
-                                                </FText>
-                                            </Button>
-                                        </Link>
-                                    </View>
-                                    <View
-                                        style={{
-                                            display: "flex",
-                                            flexDirection: "row",
-                                            alignItems: "center",
-                                            gap: 10,
-                                        }}
-                                    >
-                                        <SleepScore
-                                            iconColor={latestSleepColor[200]}
-                                            shadowColor={latestSleepColor[600]}
-                                            shadowRadius={20}
-                                        />
-                                        <FText
-                                            style={{
-                                                color: latestSleepColor[200],
-                                                overflow: "visible",
-                                                padding: 7,
-                                                fontSize: 32,
-                                                fontWeight: "700",
-                                                textShadowColor: latestSleepColor[900],
-                                                textShadowOffset: {
-                                                    width: 0,
-                                                    height: 0,
-                                                },
-                                                textShadowRadius: 20,
-                                            }}
-                                        >
-                                            {latestSleep}h
-                                        </FText>
-                                    </View>
-                                    <FText>{latestSleepRating}</FText>
-                                </>
-                            ) : (
-                                <>
-                                    <View
-                                        style={{
-                                            display: "flex",
-                                            flexDirection: "row",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            marginBottom: 20,
-                                        }}
-                                    >
-                                        <FText
-                                            style={{
-                                                color: Colors.Astronaut[50],
-                                            }}
-                                        >
-                                            Seus Registros:
-                                        </FText>
-                                        <Link href={"/entries" as RelativePathString}>
-                                            <Button
-                                                mode="contained"
-                                                style={{
-                                                    backgroundColor: Colors.Card.Stroke,
-                                                    backgroundBlendMode: "multiply",
-                                                    borderWidth: 1,
-                                                    borderColor: Colors.Card.Stroke,
-                                                }}
-                                            >
-                                                <FText
-                                                    style={{
-                                                        color: Colors.Astronaut[200],
-                                                    }}
-                                                >
-                                                    Ver todos
-                                                </FText>
-                                            </Button>
-                                        </Link>
-                                    </View>
-                                    <FText>Você ainda não fez nenhum registro de sono.</FText>
-                                    <FText>Vamos começar hoje?</FText>
-                                </>
-                            )}
-
-                            <SleepChart sleepDataLast7Days={sleepHistory} />
-                        </Surface>
-                        <View
-                            style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                gap: 20,
-                                width: "100%",
-                                flex: 1,
-                                height: 140,
-                            }}
-                        >
-                            <Surface style={styles.smallCard} elevation={4}>
-                                {deficit && deficit.status !== "even" ? (
+                <SafeAreaView style={styles.container} edges={['top']}>
+                    <ScrollView style={styles.scrollView} bounces={false}>
+                        <Greeting first_name={profile.first_name} />
+                        <View style={styles.container}>
+                            <Surface style={styles.surfaceCard} elevation={4}>
+                                {sleepHistory && sleepHistory.length > 0 ? (
                                     <>
-                                        <FText
+                                        <View
                                             style={{
-                                                fontWeight: "200",
+                                                display: "flex",
+                                                flexDirection: "row",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
                                             }}
                                         >
-                                            Você está com:
-                                        </FText>
-                                        <FText
+                                            <FText
+                                                style={{
+                                                    color: Colors.Astronaut[50],
+                                                }}
+                                            >
+                                                Último Registro:
+                                            </FText>
+                                            <Button
+                                                mode="contained"
+                                                style={{
+                                                    backgroundColor: Colors.Card.Stroke,
+                                                    backgroundBlendMode: "multiply",
+                                                    borderWidth: 1,
+                                                    borderColor: Colors.Card.Stroke,
+                                                }}
+                                                onPress={allEntries}
+                                            >
+                                                <FText
+                                                    style={{
+                                                        color: Colors.Astronaut[200],
+                                                    }}
+                                                >
+                                                    Ver todos
+                                                </FText>
+                                            </Button>
+                                        </View>
+                                        <View
                                             style={{
-                                                color: deficit.color,
-                                                fontSize: 32,
-                                                fontWeight: "700",
+                                                display: "flex",
+                                                flexDirection: "row",
+                                                alignItems: "center",
+                                                gap: 10,
                                             }}
                                         >
-                                            {deficit.value}h
-                                        </FText>
-                                        <FText
-                                            style={{
-                                                fontWeight: "400",
-                                            }}
-                                        >
-                                            de {deficit.natural} de sono esta semana
-                                        </FText>
+                                            <SleepScore
+                                                iconColor={latestSleepColor[200]}
+                                                shadowColor={latestSleepColor[600]}
+                                                shadowRadius={20}
+                                            />
+                                            <FText
+                                                style={{
+                                                    color: latestSleepColor[200],
+                                                    overflow: "visible",
+                                                    padding: 7,
+                                                    fontSize: 32,
+                                                    fontWeight: "700",
+                                                    textShadowColor: latestSleepColor[900],
+                                                    textShadowOffset: {
+                                                        width: 0,
+                                                        height: 0,
+                                                    },
+                                                    textShadowRadius: 20,
+                                                }}
+                                            >
+                                                {latestSleep}h
+                                            </FText>
+                                        </View>
+                                        <FText>{latestSleepRating}</FText>
                                     </>
                                 ) : (
                                     <>
-                                        <EvenDeficit />
-                                        <FText
+                                        <View
                                             style={{
-                                                fontWeight: "400",
+                                                display: "flex",
+                                                flexDirection: "row",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                marginBottom: 20,
                                             }}
                                         >
-                                            Parabéns, sono em dia esta semana!
-                                        </FText>
+                                            <FText
+                                                style={{
+                                                    color: Colors.Astronaut[50],
+                                                }}
+                                            >
+                                                Seus Registros:
+                                            </FText>
+                                            <Link href={"/entries" as RelativePathString}>
+                                                <Button
+                                                    mode="contained"
+                                                    style={{
+                                                        backgroundColor: Colors.Card.Stroke,
+                                                        backgroundBlendMode: "multiply",
+                                                        borderWidth: 1,
+                                                        borderColor: Colors.Card.Stroke,
+                                                    }}
+                                                >
+                                                    <FText
+                                                        style={{
+                                                            color: Colors.Astronaut[200],
+                                                        }}
+                                                    >
+                                                        Ver todos
+                                                    </FText>
+                                                </Button>
+                                            </Link>
+                                        </View>
+                                        <FText>Você ainda não fez nenhum registro de sono.</FText>
+                                        <FText>Vamos começar hoje?</FText>
                                     </>
                                 )}
-                            </Surface>
-                            <Link href={"/entries/register" as RelativePathString}>
-                                <Button
-                                    style={{ height: 140, flex: 1 }}
-                                >
 
-                                    <Surface style={styles.addButtonCard} elevation={4}>
-                                        <FText
-                                            style={{
-                                                fontSize: 48,
-                                                textAlign: "right",
-                                                fontWeight: "200",
-                                            }}
-                                        >
+                                <SleepChart sleepDataLast7Days={sleepHistory} />
+                            </Surface>
+                            <View
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    gap: 20,
+                                    width: "100%",
+                                    flex: 1,
+                                    height: 140,
+                                    marginTop: 16,
+                                }}
+                            >
+                                <Surface style={styles.smallCard} elevation={4}>
+                                    {deficit && deficit.status !== "even" ? (
+                                        <>
+                                            <FText
+                                                style={{
+                                                    fontWeight: "200",
+                                                }}
+                                            >
+                                                Você está com:
+                                            </FText>
+                                            <FText
+                                                style={{
+                                                    color: deficit.color,
+                                                    fontSize: 32,
+                                                    fontWeight: "700",
+                                                }}
+                                            >
+                                                {deficit.value}h
+                                            </FText>
+                                            <FText
+                                                style={{
+                                                    fontWeight: "400",
+                                                }}
+                                            >
+                                                de {deficit.natural} de sono esta semana
+                                            </FText>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <EvenDeficit />
+                                            <FText
+                                                style={{
+                                                    fontWeight: "400",
+                                                }}
+                                            >
+                                                Parabéns, sono em dia esta semana!
+                                            </FText>
+                                        </>
+                                    )}
+                                </Surface>
+                                <Button
+                                    style={styles.addButtonCard} onPress={addSleep}
+                                >
+                                    <View style={{display: 'flex', padding: 20}}>
+                                        <FText style={{fontSize: 48,textAlign: "right",fontWeight: 200,}}>
                                             +
                                         </FText>
-                                        <FText style={{ textAlign: "right" }}>Adicionar</FText>
-                                        <FText style={{ textAlign: "right" }}>
-                                            Registro de Sono
+                                        <FText style={{ textAlign: "right", fontWeight: 600 }}>
+                                            Novo Sono
                                         </FText>
-                                    </Surface>
+                                    </View>
                                 </Button>
-                            </Link>
+                            </View>
                         </View>
-                    </View>
-                </>
+                    </ScrollView>
+                </SafeAreaView>
             )}
         </LinearGradient>
     );
@@ -344,11 +345,16 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingTop: StatusBar.currentHeight,
+    },
+    scrollView: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 20,
     },
     gradient: {
-        paddingTop: Platform.OS === "ios" ? 50 : 20,
         flex: 1,
-        padding: 20,
         backgroundColor: "#161616",
     },
     surfaceCard: {
@@ -366,7 +372,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "flex-start",
         padding: 20,
-        marginTop: 16,
         height: 140,
         borderRadius: 30,
         borderWidth: 1,
@@ -375,15 +380,15 @@ const styles = StyleSheet.create({
     },
     addButtonCard: {
         display: "flex",
+        flexDirection: 'column',
         height: 140,
         justifyContent: "center",
         alignItems: "flex-end",
-        padding: 20,
-        marginTop: 16,
         borderRadius: 30,
         borderWidth: 1,
         borderColor: Colors.Card.Stroke,
         backgroundColor: Colors.Astronaut[900],
+
     },
     errorText: {
         color: "#ff8a80",

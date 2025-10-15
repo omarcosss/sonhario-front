@@ -78,16 +78,16 @@ export default function CrossPlatformDatePicker({
     <Pressable
       onPress={onPress}
       style={{
-        paddingVertical: 6,
-        paddingHorizontal: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 16,
         borderRadius: 999,
-        borderWidth: active? 2 : 1,
+        borderWidth: 1,
         borderColor: Colors.Card.Stroke,
-        backgroundColor: active ? Colors.Card.Background : 'transparent',
+        backgroundColor: Colors.Card.Background,
         marginRight: 8,
       }}
     >
-      <Text style={{ color: Colors.Astronaut[50], fontSize: 12 }}>{children}</Text>
+      <Text style={{ color: Colors.Astronaut[50], fontSize: 16 }}>{children}</Text>
     </Pressable>
   );
 
@@ -110,8 +110,8 @@ export default function CrossPlatformDatePicker({
                   style={{
                     padding: '6px 10px',
                     borderRadius: 999,
-                    border: `1px solid ${Colors.Astronaut[700]}`,
-                    background: 'transparent',
+                    border: `1px solid ${Colors.Card.Stroke}`,
+                    background: Colors.Card.Background,
                     color: Colors.Astronaut[50],
                     marginRight: 8,
                     cursor: 'pointer'
@@ -133,7 +133,7 @@ export default function CrossPlatformDatePicker({
               next.setMinutes(m);
               onChange(next);
             }}
-            style={{ fontSize: 16, padding: 10, borderRadius: 8,border: 'none', backgroundColor: 'transparent', color: Colors.Astronaut[50] }}
+            style={{ fontSize: 16, padding: 10, borderRadius: 8,borderWidth: 1, borderColor: Colors.Card.Stroke, backgroundColor: Colors.Card.Background, color: Colors.Astronaut[50] }}
           />
         </div>
       );
@@ -149,8 +149,8 @@ export default function CrossPlatformDatePicker({
                   style={{
                     padding: '6px 10px',
                     borderRadius: 999,
-                    border: `1px solid ${Colors.Astronaut[700]}`,
-                    background: 'transparent',
+                    border: `1px solid ${Colors.Card.Stroke}`,
+                    background: Colors.Card.Background,
                     color: Colors.Astronaut[50],
                     marginRight: 8,
                     cursor: 'pointer'
@@ -173,7 +173,7 @@ export default function CrossPlatformDatePicker({
               next.setDate(d);
               onChange(next);
             }}
-            style={{ fontSize: 16, padding: 10, borderRadius: 8,border: 'none', backgroundColor: 'transparent', color: Colors.Astronaut[50] }}
+            style={{ fontSize: 16, padding: 10, borderRadius: 8, borderColor: Colors.Card.Stroke, backgroundColor: Colors.Card.Background, color: Colors.Astronaut[50] }}
           />
         </div>
       );
@@ -188,27 +188,27 @@ export default function CrossPlatformDatePicker({
   }
   return (
     <View style={{ gap: 8, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-      {showSuggestions !== false && (
-        <View style={{ flexDirection: 'row', alignSelf: 'flex-end' }}>
-          {mode === 'time' && timeSuggestions.map(s => (
-            <SuggestionChip key={s.label} onPress={() => applyTime(s.h, s.m)}>{s.label}</SuggestionChip>
-          ))}
-          {mode === 'date' && dateSuggestions.map(s => (
-            <SuggestionChip key={s.label} onPress={() => applyDateOffsetDays(s.offset)}>{s.label}</SuggestionChip>
-          ))}
-        </View>
-      )}
       <Pressable
         onPress={() => setOpen(true)}
-        style={{ display: 'flex', justifyContent: 'flex-end', paddingVertical: 10 }}
+        style={{ display: 'flex', justifyContent: 'center', padding: 10, borderRadius: 999, borderWidth: 1, borderColor: Colors.Card.Stroke, backgroundColor: Colors.Card.Background }}
       >
         <Text style={{color: Colors.Astronaut[50], textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}>{displayValue}</Text>
       </Pressable>
 
       {open && (
-        <Modal transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <Modal transparent animationType="slide" onRequestClose={() => setOpen(false)}>
           <Pressable style={{ flex: 1, backgroundColor: '#0006' }} onPress={() => setOpen(false)} />
-          <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 12, backgroundColor: Colors.Astronaut[950], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 12, backgroundColor: Colors.dark.background, display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: 40, borderTopRightRadius: 40, borderWidth: 1, borderColor: Colors.Card.Stroke, borderBottomColor: Colors.dark.background  }}>
+            {showSuggestions !== false && (
+              <View style={{ flexDirection: 'row', alignSelf: 'stretch', justifyContent: 'flex-end', marginTop: 12 }}>
+                {mode === 'time' && timeSuggestions.map(s => (
+                  <SuggestionChip key={s.label} onPress={() => applyTime(s.h, s.m)}>{s.label}</SuggestionChip>
+                ))}
+                {mode === 'date' && dateSuggestions.map(s => (
+                  <SuggestionChip key={s.label} onPress={() => applyDateOffsetDays(s.offset)}>{s.label}</SuggestionChip>
+                ))}
+              </View>
+            )}
             <DateTimePicker
               value={value}
               mode={mode}
@@ -227,6 +227,7 @@ export default function CrossPlatformDatePicker({
                 if (selected) onChange(selected);
               }}
             />
+            
           </View>
         </Modal>
       )}
