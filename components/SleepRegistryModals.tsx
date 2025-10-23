@@ -6,6 +6,12 @@ import FText from "@/components/FText";
 import { QualityChip } from "@/components/QualityChip";
 import { Colors } from "@/constants/Colors";
 import { getTokens } from "@/utils/authStorage";
+// 1. IMPORTAR AS FUNÇÕES DE NOTIFICAÇÃO DO SEU SERVIÇO
+import {
+  scheduleSleepNotification,
+  scheduleWakeUpNotification,
+} from "@/services/notificationService";
+//
 import DateTimePicker, {
     DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
@@ -245,16 +251,38 @@ const SleepRegistrySheet = forwardRef<
     }
   };
 
-  const saveEntry = async (goTo: Step | null = null) => {
+  //parte nova notifications
+const saveEntry = async (goTo: Step | null = null) => {
     setLoading(true);
     setError(null);
     try {
       const payload = toAPIEntryPayload(state);
       const data = await apiPost<{ id: number }>("/entries/", payload);
       setField("entryId", data.id);
+
+      // 2. LÓGICA PARA AGENDAR AS NOTIFICAÇÕES
+      // Apenas agendamos se for um plano de sono (quando goTo é nulo)
+      if (goTo === null) {
+        console.log("A agendar notificações para plano de sono...");
+        const sleepTime = {
+          hour: state.goToBedTime.getHours(),
+          minute: state.goToBedTime.getMinutes(),
+        };
+        const wakeUpTime = {
+          hour: state.wakeUpTime.getHours(),
+          minute: state.wakeUpTime.getMinutes(),
+        };
+
+        // Chama as funções do serviço para agendar
+        await Promise.all([
+          scheduleSleepNotification(sleepTime),
+          scheduleWakeUpNotification(wakeUpTime),
+        ]);
+      }
+
       if (goTo) setStep(goTo);
       else {
-        // Confirm-only flow (plan)
+        // Fluxo apenas de confirmação (plano)
         setConfirm({ visible: true, kind: "plan" });
       }
     } catch (e: any) {
@@ -263,6 +291,26 @@ const SleepRegistrySheet = forwardRef<
       setLoading(false);
     }
   };
+  //
+
+  // const saveEntry = async (goTo: Step | null = null) => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const payload = toAPIEntryPayload(state);
+  //     const data = await apiPost<{ id: number }>("/entries/", payload);
+  //     setField("entryId", data.id);
+  //     if (goTo) setStep(goTo);
+  //     else {
+  //       // Confirm-only flow (plan)
+  //       setConfirm({ visible: true, kind: "plan" });
+  //     }
+  //   } catch (e: any) {
+  //     setError(e.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const addDream = async () => {
     if (!state.entryId) {
