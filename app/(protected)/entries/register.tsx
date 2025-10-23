@@ -138,7 +138,6 @@ export default function SleepRegister() {
     const [insightResults, setInsightResults] = useState<any>(null);
 
     const [entryId, setEntryId] = useState<number>();
-    const dreamModalRef = useRef<Modalize>(null);
     const [showDreamModal, setShowDreamModal] = useState(false);
     const [dreamDescription, setDreamDescription] = useState("");
     const [dreamEmotion, setDreamEmotion] = useState<"1" | "2" | "3">("1");
@@ -228,14 +227,6 @@ export default function SleepRegister() {
 
         fetchPageData();
     }, [refresh]);
-
-    useEffect(() => {
-        if (showDreamModal) {
-            dreamModalRef.current?.open();
-        } else {
-            dreamModalRef.current?.close();
-        }
-    }, [showDreamModal]);
 
     const handleEntryPost = async (insight: boolean = false) => {
         setLoading(true);
@@ -347,12 +338,8 @@ export default function SleepRegister() {
     };
 
     const handleCloseDreamModal = () => {
-        setShowDreamModal(false);
-    };
-
-    const handleDreamModalClosed = () => {
-        setShowDreamModal(false);
         resetDreamForm();
+        setShowDreamModal(false);
         router.replace('/(protected)/(tabs)');
     };
 
@@ -389,6 +376,8 @@ export default function SleepRegister() {
             }
 
             setShowDreamModal(false);
+            resetDreamForm();
+            router.replace('/(protected)/(tabs)');
         } catch (e) {
             console.error(e);
             setDreamError("Não foi possível conectar ao servidor. Tente novamente.");
@@ -550,23 +539,25 @@ export default function SleepRegister() {
                     </View>
                 </View>
             </ModalRN>
-            <Modalize
-                ref={dreamModalRef}
-                {...modalizeOptions}
-                onClosed={handleDreamModalClosed}
-                closeOnOverlayTap
+            <ModalRN
+                isVisible={showDreamModal}
+                animationIn={'zoomIn'}
+                animationOut={'zoomOut'}
+                onBackdropPress={handleCloseDreamModal}
             >
-                <DreamRegisterModal
-                    description={dreamDescription}
-                    emotion={dreamEmotion}
-                    loading={dreamLoading}
-                    error={dreamError}
-                    onChangeDescription={setDreamDescription}
-                    onChangeEmotion={setDreamEmotion}
-                    onBack={handleCloseDreamModal}
-                    onSubmit={handleSubmitDream}
-                />
-            </Modalize>
+                <View style={styles.dreamModal}>
+                    <DreamRegisterModal
+                        description={dreamDescription}
+                        emotion={dreamEmotion}
+                        loading={dreamLoading}
+                        error={dreamError}
+                        onChangeDescription={setDreamDescription}
+                        onChangeEmotion={setDreamEmotion}
+                        onBack={handleCloseDreamModal}
+                        onSubmit={handleSubmitDream}
+                    />
+                </View>
+            </ModalRN>
         </LinearGradient>
     );
 }
@@ -653,4 +644,12 @@ const styles = StyleSheet.create({
     predictionLabel: { display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10 },
     errorText: { color: '#ff8a80', textAlign: 'center', fontFamily: 'Fustat', fontSize: 14, marginBottom: -10, marginTop: 5, },
     footer: { display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: 20, marginVertical: 30 },
+    dreamModal: {
+        backgroundColor: '#131623',
+        borderColor: Colors.Card.Stroke,
+        borderWidth: 1,
+        borderRadius: 40,
+        padding: 20,
+        gap: 20,
+    },
 });
