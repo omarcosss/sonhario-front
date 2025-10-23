@@ -154,7 +154,7 @@ export default function HomeScreen() {
                 <SafeAreaView style={styles.container} edges={['top']}>
                     <ScrollView style={styles.scrollView} bounces={false}>
                         <Greeting first_name={profile.first_name} />
-                        <View style={styles.container}>
+                        <View style={{display: 'flex', paddingBottom: 40}}>
                             <Surface style={styles.surfaceCard} elevation={4}>
                                 {sleepHistory && sleepHistory.length > 0 ? (
                                     <>
@@ -352,6 +352,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         padding: 20,
+        // paddingBottom: 88
     },
     gradient: {
         flex: 1,

@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingVertical: 10,
         borderRadius: 50,
-        backgroundColor: Colors.Card.Background,
+        // backgroundColor: Colors.Card.Background,
         borderWidth: 1,
         borderColor: Colors.Card.Stroke,
     },
