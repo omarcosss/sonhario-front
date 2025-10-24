@@ -87,7 +87,7 @@ export default function LoginScreen() {
           <View style={styles.signupContainer}>
             <Pressable onPress={toForgotPassword}>
               <Text style={styles.linkText}>
-                Esqueci minha senha
+                
               </Text>
             </Pressable>
           </View>
