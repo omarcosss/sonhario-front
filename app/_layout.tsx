@@ -35,6 +35,9 @@ export default function RootLayout(){
                             <Stack.Screen name='(protected)' options={{
                                 headerShown: false
                             }} />
+                            <Stack.Screen name='prelogin' options={{
+                                headerShown: false
+                            }} />
                             <Stack.Screen name='login' options={{
                                 headerShown: false
                             }} />
