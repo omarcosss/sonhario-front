@@ -110,7 +110,7 @@ export default function ProfileEditScreen () {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.container}>
-            <Text style={styles.title}>Registros de Sonhos</Text>         
+            <Text style={styles.title}>Editar minhas informações</Text>         
 
             <View style={styles.formSection}>
             <View style={styles.inputsWrapper}>
