@@ -1,9 +1,10 @@
-import { IconHelp, IconLogout, IconNotification, IconSecurity, IconSettings, IconUserCircle, IconUserEdit } from '@/assets/icons'; // Seus ícones
+import { IconLogout, IconUserCircle, IconUserEdit } from '@/assets/icons'; // Seus ícones
 import { Colors } from '@/constants/Colors';
 import { AuthContext } from '@/utils/authContext';
 import { getTokens } from '@/utils/authStorage';
 import { Feather } from '@expo/vector-icons'; // Para o ícone de seta
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useContext, useEffect, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -72,8 +73,13 @@ export default function UserProfile() {
     // Funções de clique (por enquanto, apenas um log)
     const handlePress = async (action: string) => {
         console.log(`Ação: ${action}`);
-        if (action == "Sair") {
-            await authContext.logOut();
+        switch (action) {
+            case "profile":
+                router.push('/settings/profile');
+                break;
+            case "logout":
+                await authContext.logOut();
+                break;
         }
     };
 
@@ -102,35 +108,35 @@ export default function UserProfile() {
                     {/* Seção de Configurações */}
                     <View style={styles.menuSection}>
                         <Text style={styles.sectionTitle}>Configurações</Text>
-                        <ProfileMenuItem 
+                        {/* <ProfileMenuItem 
                             icon={<IconSecurity width={24} height={24} color={Colors.Astronaut[50]} />} 
                             label="Segurança da Conta"
-                            onPress={() => handlePress('Segurança')} 
-                        />
-                        <ProfileMenuItem 
+                            onPress={() => handlePress('safety')} 
+                        /> */}
+                        {/* <ProfileMenuItem 
                             icon={<IconSettings width={24} height={24} color={Colors.Astronaut[50]}/>} 
                             label="Ajustes" 
-                            onPress={() => handlePress('Ajustes')}
-                        />
-                        <ProfileMenuItem 
-                            icon={<IconNotification width={24} height={24} color={Colors.Astronaut[50]} />} 
-                            label="Notificações" 
-                            onPress={() => handlePress('Notificações')}
-                        />
+                            onPress={() => handlePress('settings')}
+                        /> */}
                         <ProfileMenuItem 
                             icon={<IconUserEdit width={24} height={24} color={Colors.Astronaut[50]}/>} 
                             label="Editar minhas informações" 
-                            onPress={() => handlePress('Editar Informações')}
+                            onPress={() => handlePress('profile')}
                         />
-                        <ProfileMenuItem 
+                        {/* <ProfileMenuItem 
+                            icon={<IconNotification width={24} height={24} color={Colors.Astronaut[50]} />} 
+                            label="Notificações" 
+                            onPress={() => handlePress('notifications')}
+                        /> */}
+                        {/* <ProfileMenuItem 
                             icon={<IconHelp width={24} height={24} color={Colors.Astronaut[50]}/>} 
                             label="Ajuda" 
-                            onPress={() => handlePress('Ajuda')}
-                        />
+                            onPress={() => handlePress('help')}
+                        /> */}
                         <ProfileMenuItem 
                             icon={<IconLogout width={24} height={24} color={Colors.Astronaut[50]}/>} 
                             label="Sair" 
-                            onPress={() => handlePress('Sair')}
+                            onPress={() => handlePress('logout')}
                         />
                     </View>
                 </>)}                

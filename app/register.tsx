@@ -1,3 +1,4 @@
+import GenderSelect from '@/components/GenderSelect';
 import Input from '@/components/InputLogin';
 import { Colors } from "@/constants/Colors";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -55,6 +56,7 @@ export default function RegisterScreen() {
 
   // Função genérica para atualizar o estado do formulário
   const handleInputChange = (field: keyof typeof formData, value: string) => {
+    console.log(value);
     setFormData(prevState => ({ ...prevState, [field]: value }));
   };
 
@@ -136,8 +138,12 @@ export default function RegisterScreen() {
               <View style={styles.formSection}>
                 <View style={styles.inputsWrapper}>
                   <Input placeholder='Seu Nome' icone='User' value={formData.display_name} onChangeText={(text) => handleInputChange('display_name', text)} autoCapitalize='words' />
-                  <Input placeholder='Gênero' icone='User' value={formData.gender} onChangeText={(text) => handleInputChange('gender', text)} />
-                  <Input placeholder='Data de Nascimento' icone='Calendar' value={formData.birthdate} onChangeText={(text) => handleInputChange('birthdate', text)} />
+                  <GenderSelect icone='User' value={formData.gender} onChangeText={(text) => handleInputChange('gender', text)} items={[
+                      { label: 'Masculino', value: 'Male' },
+                      { label: 'Feminino', value: 'Female' },
+                      { label: 'Outro', value: 'Other' },
+                  ]} />
+                  <Input placeholder='Data de Nascimento' icone='Calendar' type="date" value={formData.birthdate} onChangeText={(text) => handleInputChange('birthdate', text)} />
                 </View>
                 {/* Área de ERRO */}
                 {error && <Text style={styles.errorText}>{error}</Text>}
@@ -298,4 +304,3 @@ const styles = StyleSheet.create({
     fontFamily: 'Fustat',
   },
 });
-

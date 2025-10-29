@@ -29,6 +29,7 @@ export default function ProtectedLayout() {
       }} />
       <Stack.Screen name="+not-found" />
       <Stack.Screen name="prelogin" options={{ headerShown: false }} />
+      <Stack.Screen name="settings/profile" options={{ headerShown: false }} />
       <Stack.Screen name="(editor)" options={{ headerShown: false }} />
     </Stack>
   );

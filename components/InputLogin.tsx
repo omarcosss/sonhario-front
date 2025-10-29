@@ -3,8 +3,9 @@ import IconEnvelope from '@/assets/icons/Email';
 import IconLock from '@/assets/icons/Password';
 import IconUser from '@/assets/icons/User';
 import { Colors } from '@/constants/Colors';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
+import UniversalDatePicker from './UniversalDatePicker';
 
 type IconProps={icon:'Envelope' | 'Lock' | 'User' | 'Calendar'}
 const Icon = ({icon}:IconProps) => {
@@ -24,33 +25,60 @@ type InputLoginProps={
     placeholder: string, 
     icone: 'Envelope' | 'Lock' | 'User' | 'Calendar',
     senha?: boolean,
-    value: string;
+    value?: string;
     onChangeText: (text: string) => void;
     autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+    type?: 'text' | 'date';
 }
 
 export default function InputLogin({
     placeholder,
     icone,
     senha=false,
-    value,
+    value="",
     onChangeText,
-    autoCapitalize = 'sentences'
+    autoCapitalize = 'sentences',
+    type = 'text'
 }:InputLoginProps){
+
+    const [date, setDate] = useState<Date>(new Date(value));
+
+    const convertDateToText = useCallback((dateValue: Date) => {
+        const year = dateValue.getFullYear();
+        const month = String(dateValue.getMonth() + 1).padStart(2, '0');
+        const day = String(dateValue.getDate()).padStart(2, '0');
+
+        onChangeText(`${year}-${month}-${day}`);
+    }, [date]);
+
+    useEffect(() => {
+        if (type == 'date') {
+            setDate(new Date(value));
+        }
+    }, [value]);
 
     return(
         <View>
             <View style={styles.container}>
                 <Icon icon={icone}/>
-                <TextInput
-                    style={styles.input}
-                    value={value}
-                    onChangeText={onChangeText}
-                    placeholder={placeholder}
-                    placeholderTextColor={Colors.Astronaut[100]}
-                    secureTextEntry={senha}
-                    autoCapitalize={autoCapitalize}
-                />
+                {type == 'date' ?
+                    <UniversalDatePicker
+                        mode="date"
+                        value={date}
+                        onChange={convertDateToText}
+                        locale="pt-BR"
+                    />
+                :                    
+                    <TextInput
+                        style={styles.input}
+                        value={value}
+                        onChangeText={onChangeText}
+                        placeholder={placeholder}
+                        placeholderTextColor={Colors.Astronaut[100]}
+                        secureTextEntry={senha}
+                        autoCapitalize={autoCapitalize}
+                    />
+                }
             </View>
         </View>
     )
