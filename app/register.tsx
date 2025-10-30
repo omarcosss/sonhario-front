@@ -27,6 +27,16 @@ export default function RegisterScreen() {
     gender: '',
   });
 
+  const formatDateForFetch = (data: any) => {
+    const newData = {...data};
+    const birthdate = newData.birthdate.split('/');
+    if (birthdate.length < 3) return data;
+
+    newData.birthdate = birthdate.reverse().join('-');   
+
+    return newData;
+  }
+
   const handleRegister = async (checkOnly: boolean) => {
     setLoading(true);
     setError(null);
@@ -36,7 +46,7 @@ export default function RegisterScreen() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'},
-            body: JSON.stringify(formData),
+            body: JSON.stringify(formatDateForFetch(formData)),
         });
         const data = await response.json();
         if (!response.ok) {
@@ -56,7 +66,6 @@ export default function RegisterScreen() {
 
   // Função genérica para atualizar o estado do formulário
   const handleInputChange = (field: keyof typeof formData, value: string) => {
-    console.log(value);
     setFormData(prevState => ({ ...prevState, [field]: value }));
   };
 

@@ -3,9 +3,8 @@ import IconEnvelope from '@/assets/icons/Email';
 import IconLock from '@/assets/icons/Password';
 import IconUser from '@/assets/icons/User';
 import { Colors } from '@/constants/Colors';
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
-import UniversalDatePicker from './UniversalDatePicker';
 
 type IconProps={icon:'Envelope' | 'Lock' | 'User' | 'Calendar'}
 const Icon = ({icon}:IconProps) => {
@@ -40,45 +39,46 @@ export default function InputLogin({
     autoCapitalize = 'sentences',
     type = 'text'
 }:InputLoginProps){
+    
+    const handleDate = (value: string) => {
+        const cleanedDigits = value.replace(/\D/g, '');
 
-    const [date, setDate] = useState<Date>(new Date(value));
+        let maskedValue = '';
 
-    const convertDateToText = useCallback((dateValue: Date) => {
-        const year = dateValue.getFullYear();
-        const month = String(dateValue.getMonth() + 1).padStart(2, '0');
-        const day = String(dateValue.getDate()).padStart(2, '0');
-
-        onChangeText(`${year}-${month}-${day}`);
-    }, [date]);
-
-    useEffect(() => {
-        if (type == 'date') {
-            setDate(new Date(value));
+        // 2. Build the dd/mm/yyyy mask based ONLY on the sequence of digits
+        if (cleanedDigits.length > 0) {
+            // DD part (up to 2 digits)
+            maskedValue += cleanedDigits.substring(0, 2);
         }
-    }, [value]);
+
+        if (cleanedDigits.length >= 3) {
+            // Insert first slash (Requirement 3: Slash is inserted only after 2 digits).
+            maskedValue += '/';
+            maskedValue += cleanedDigits.substring(2, 4);
+        }
+
+        if (cleanedDigits.length >= 5) {
+            // Insert second slash (Requirement 3: Slash is inserted only after 4 digits).
+            maskedValue += '/';
+            maskedValue += cleanedDigits.substring(4, 8);
+        }
+
+        onChangeText(maskedValue);
+    };
 
     return(
         <View>
             <View style={styles.container}>
-                <Icon icon={icone}/>
-                {type == 'date' ?
-                    <UniversalDatePicker
-                        mode="date"
-                        value={date}
-                        onChange={convertDateToText}
-                        locale="pt-BR"
-                    />
-                :                    
-                    <TextInput
-                        style={styles.input}
-                        value={value}
-                        onChangeText={onChangeText}
-                        placeholder={placeholder}
-                        placeholderTextColor={Colors.Astronaut[100]}
-                        secureTextEntry={senha}
-                        autoCapitalize={autoCapitalize}
-                    />
-                }
+                <Icon icon={icone}/>             
+                <TextInput
+                    style={styles.input}
+                    value={value}
+                    onChangeText={type == "date" ? handleDate : onChangeText}
+                    placeholder={placeholder}
+                    placeholderTextColor={Colors.Astronaut[100]}
+                    secureTextEntry={senha}
+                    autoCapitalize={autoCapitalize}
+                />
             </View>
         </View>
     )

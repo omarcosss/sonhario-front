@@ -72,7 +72,6 @@ export default function UserProfile() {
 
     // Funções de clique (por enquanto, apenas um log)
     const handlePress = async (action: string) => {
-        console.log(`Ação: ${action}`);
         switch (action) {
             case "profile":
                 router.push('/settings/profile');

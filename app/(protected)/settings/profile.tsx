@@ -21,6 +21,16 @@ export default function ProfileEditScreen () {
     gender: '',
   });
 
+  const formatDateForFetch = (data: any) => {
+    const newData = {...data};
+    const birthdate = newData.birthdate.split('/');
+    if (birthdate.length < 3) return data;
+
+    newData.birthdate = birthdate.reverse().join('-');   
+
+    return newData;
+  }
+
   const handleSubmit = async (checkOnly: boolean) => {
     setLoading(true);
     setError(null);
@@ -34,7 +44,7 @@ export default function ProfileEditScreen () {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${accessToken}`
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(formatDateForFetch(formData)),
         });
         const data = await response.json();
         if (!response.ok) {
@@ -71,7 +81,6 @@ export default function ProfileEditScreen () {
             setError(data.error || 'Houve um problema ao recuperar informações do perfil.');
         } else {
             setError(null);
-            console.log(data.birthdate);
             setFormData({
               display_name: data.display_name,
               birthdate: data.birthdate,
