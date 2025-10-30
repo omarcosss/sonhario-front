@@ -99,7 +99,8 @@ export interface SleepPrevData {
     wakeUpTime: Date;
     caffeineAmount: number;
     exercise: number;
-    notes: string
+    notes: string | null;
+    sleepQuality?: number | null;
 }
 
 interface SleepEntry {
@@ -130,8 +131,9 @@ export default function SleepRegister() {
     const [caffeineAmount, setCaffeineAmount] = useState<number>(1);
     const [exercise, setExercise] = useState<number>(15);
     const [tempDate, setTempDate] = useState(new Date());
-
+    
     const [notes, setNotes] = useState(null);
+    const [sleepQuality, setSleepQuality] = useState<number>(0);
     const [height, setHeight] = useState(40);
 
     const [insightResults, setInsightResults] = useState<any>(null);
@@ -245,7 +247,8 @@ export default function SleepRegister() {
                     sleep_end_time: dateConvertTo(wakeUpTime, "time"),
                     coffee_cups: caffeineAmount,
                     exercise: exercise,
-                    notes: notes,
+                    sleep_quality: selected == 'registrar' ? sleepQuality : null,
+                    notes:  selected == 'registrar' ? notes : null,
                 }),
             });
             const data = await response.json();
@@ -322,7 +325,8 @@ export default function SleepRegister() {
             wakeUpTime,
             caffeineAmount,
             exercise,
-            notes
+            notes,
+            sleepQuality
         };
         handleSaveSleep(data);
         setShowConfirmPrev(false);
@@ -462,6 +466,12 @@ export default function SleepRegister() {
                                 style={styles.TextInput}
                                 returnKeyType="done"
                             />
+                            <View style={styles.InputRow}>
+                                <View style={{display: 'flex', gap: 4}}>
+                                    <FText>Qualidade do sono</FText>
+                                </View>
+                                <Counter value={sleepQuality} onValueChange={setSleepQuality} minValue={0} maxValue={10} />
+                            </View>
                         </View>
                     ) : (null)}
 
