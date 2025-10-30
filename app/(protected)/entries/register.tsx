@@ -481,10 +481,25 @@ export default function SleepRegister() {
                         <Counter value={exercise} onValueChange={setExercise} minValue={0} step={5} />
                     </View>
 
+                    {error && (
+                        <FText style={styles.errorText}>{error}</FText>
+                    )}
                     {selected === "planejar" ? (
-                        <Button mode="contained" onPress={handlePlanPrediction} style={{ flex: 1, backgroundColor: Colors.Astronaut[900], marginBottom: 80 }} disabled={loading}><FText>Continuar</FText></Button>
+                        <Button mode="contained" onPress={handlePlanPrediction} style={{ flex: 1, backgroundColor: Colors.Astronaut[900], marginBottom: 80 }} disabled={loading}>
+                            {loading ? (
+                                <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                            ) : (
+                                <FText>Continuar</FText>
+                            )}
+                        </Button>
                     ) : (
-                        <Button mode="contained" onPress={handleSavePrev} style={{ flex: 1, backgroundColor: Colors.Astronaut[900], marginBottom: 80 }} disabled={loading}><FText>Confirmar</FText></Button>
+                        <Button mode="contained" onPress={handleSavePrev} style={{ flex: 1, backgroundColor: Colors.Astronaut[900], marginBottom: 80 }} disabled={loading}>
+                            {loading ? (
+                                <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                            ) : (
+                                <FText>Continuar</FText>
+                            )}
+                        </Button>
                     )}
                 </ScrollView>
             </KeyboardAvoidingView>
