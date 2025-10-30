@@ -13,6 +13,7 @@ import { ActivityIndicator, Surface } from "react-native-paper";
 interface SleepEntry {
     date: string;
     hours: number;
+    notes?: string;
 }
 
 
@@ -50,7 +51,7 @@ export default function AllEntries() {
                 } else {
                     const fetchedData: (SleepEntry | null)[] = []
                     data.forEach((entry: any) => {
-                        fetchedData.push({ date: entry.date, hours: entry.total_sleep_hours })
+                        fetchedData.push({ date: entry.date, hours: entry.total_sleep_hours, notes: entry.notes })
                     })
 
                     const latestHours = data[0].total_sleep_hours;

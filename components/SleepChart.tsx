@@ -1,6 +1,6 @@
 import { Colors } from '@/constants/Colors';
 import React, { FC, useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { GestureResponderEvent, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Line, Rect, Svg } from 'react-native-svg';
 
 // --- Type Definitions ---
@@ -10,6 +10,7 @@ interface SleepRecord {
   hours: number;
   // The date is now the mandatory key for matching data.
   date: string; // <-- CHANGED: Expects 'YYYY-MM-DD' format
+  notes?: string;
 }
 
 type DayOfWeek = 'Dom' | 'Seg' | 'Ter' | 'Qua' | 'Qui' | 'Sex' | 'Sab';
@@ -20,7 +21,6 @@ interface RoundedBarProps {
   width: number;
   height: number;
   color: string;
-  onPress?: () => void;
 }
 
 // Internal state now holds the generated day name
@@ -28,6 +28,7 @@ interface ProcessedSleepRecord {
     day: DayOfWeek;
     hours: number;
     date: string;
+    notes?: string;
 }
 
 interface TooltipState {
@@ -37,8 +38,15 @@ interface TooltipState {
   day: DayOfWeek;
   hours: number;
   date?: string;
+  notes?: string;
 }
 
+interface NoteModalContent {
+  note: string;
+  date?: string;
+  day?: DayOfWeek;
+  hours?: number;
+}
 interface SleepChartProps {
   /**
    * Array of sleep records for the last 7 days.
@@ -49,7 +57,7 @@ interface SleepChartProps {
 
 
 // --- Helper Component for Bar (Unchanged) ---
-const RoundedBar: FC<RoundedBarProps> = ({ width, height, x, y, color, onPress }) => {
+const RoundedBar: FC<RoundedBarProps> = ({ width, height, x, y, color }) => {
   if (height <= 0) return null;
 
   const barRadius = Math.min(width / 2);
@@ -64,7 +72,6 @@ const RoundedBar: FC<RoundedBarProps> = ({ width, height, x, y, color, onPress }
       stroke={Colors.Astronaut[400]}
       rx={barRadius}
       ry={barRadius}
-      onPress={onPress}
     />
   );
 };
@@ -75,6 +82,8 @@ const SleepChart: FC<SleepChartProps> = ({ sleepDataLast7Days }) => {
   const [processedData, setProcessedData] = useState<ProcessedSleepRecord[]>([]);
   const [maxSleepHours, setMaxSleepHours] = useState<number>(1);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const [noteModalVisible, setNoteModalVisible] = useState(false);
+  const [noteModalContent, setNoteModalContent] = useState<NoteModalContent | null>(null);
 
   // This is now just a mapping helper, not the source of order
   const dayAbbreviations: DayOfWeek[] = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
@@ -83,22 +92,23 @@ const SleepChart: FC<SleepChartProps> = ({ sleepDataLast7Days }) => {
   const barMargin = 10;
   const totalChartWidth = (barWidth + barMargin) * 7 - barMargin;
 
-  const handleBarPress = (dayData: ProcessedSleepRecord, xPosition: number, yPosition: number, barHeight: number) => {
+  const handleBarPress = (dayData: ProcessedSleepRecord, xPosition: number, yPosition: number) => {
     const tooltipTop = yPosition - 60;
 
     setTooltip({
       visible: true,
-      x: xPosition - 7.5 , // Center tooltip relative to the bar
+      x: xPosition - 7.5, // Center tooltip relative to the bar
       y: tooltipTop,
       day: dayData.day,
       hours: dayData.hours,
       date: Intl.DateTimeFormat('pt-BR').format(new Date(dayData.date)),
-    })
-  }
+      notes: dayData.notes,
+    });
+  };
 
   const handleOutsidePress = () => {
     setTooltip(null);
-  }
+  };
 
   // --- MAJOR CHANGE IN LOGIC ---
   useEffect(() => {
@@ -133,7 +143,7 @@ const SleepChart: FC<SleepChartProps> = ({ sleepDataLast7Days }) => {
         maxHours = hours;
       }
       // Use the dynamically generated dayName for the label
-      return { day: meta.dayName, hours, date: meta.dateString };
+      return { day: meta.dayName, hours, date: meta.dateString, notes: foundDay?.notes };
     });
 
     setMaxSleepHours(maxHours > 0 ? maxHours : 1);
@@ -146,9 +156,55 @@ const SleepChart: FC<SleepChartProps> = ({ sleepDataLast7Days }) => {
   }
 
   // --- RENDER LOGIC (Mostly Unchanged) ---
+  const barConfigs = processedData.map((dayData, index) => {
+    const barScaleFactor = maxSleepHours > 0 ? dayData.hours / maxSleepHours : 0;
+    const barHeight = dayData.hours > 0 ? barScaleFactor * chartHeight * 0.9 : 0;
+    const xPosition = index * (barWidth + barMargin);
+    const hasSleepHours = dayData.hours > 0 && barHeight > 0;
+    const svgYPosition = hasSleepHours ? chartHeight - barHeight - 3 : chartHeight - 2;
+    const pressYPosition = hasSleepHours ? chartHeight - barHeight - 3 : chartHeight - 2;
+
+    return {
+      dayData,
+      xPosition,
+      barHeight,
+      hasSleepHours,
+      svgYPosition,
+      pressYPosition,
+    };
+  });
+
+  const modalHours = noteModalContent?.hours;
+
+  const createPressHandler = (dayData: ProcessedSleepRecord, xPosition: number, yPosition: number) => {
+    return (event: GestureResponderEvent) => {
+      event.stopPropagation?.();
+      handleBarPress(dayData, xPosition, yPosition);
+    };
+  };
+
+  const handleNotesButtonPress = (event: GestureResponderEvent) => {
+    event.stopPropagation?.();
+    if (!tooltip?.notes) {
+      return;
+    }
+    setNoteModalContent({
+      note: tooltip.notes,
+      date: tooltip.date,
+      day: tooltip.day,
+      hours: tooltip.hours,
+    });
+    setNoteModalVisible(true);
+  };
+
+  const handleCloseNoteModal = () => {
+    setNoteModalVisible(false);
+    setNoteModalContent(null);
+  };
+
   return (
-    <TouchableWithoutFeedback onPress={handleOutsidePress}>
-      <View style={styles.container}>
+    <>
+      <Pressable style={styles.container} onPress={handleOutsidePress}>
         <View style={styles.chartArea}>
           <Svg height={chartHeight} width={totalChartWidth}>
               <Line
@@ -174,13 +230,8 @@ const SleepChart: FC<SleepChartProps> = ({ sleepDataLast7Days }) => {
                   );
               })}
 
-              {processedData.map((dayData, index) => {
-                  const barScaleFactor = maxSleepHours > 0 ? dayData.hours / maxSleepHours : 0;
-                  const barHeight = dayData.hours > 0 ? barScaleFactor * chartHeight * 0.9 : 0;
-                  const xPosition = index * (barWidth + barMargin);
-                  const yPosition = chartHeight - barHeight;
-
-                  if (dayData.hours === 0 || barHeight <= 0) {
+              {barConfigs.map(({ dayData, xPosition, barHeight, hasSleepHours, svgYPosition }) => {
+                  if (!hasSleepHours) {
                     return (
                       <Rect
                         key={`${dayData.date}-empty`} // Use date for key
@@ -189,7 +240,6 @@ const SleepChart: FC<SleepChartProps> = ({ sleepDataLast7Days }) => {
                         width={2}
                         height={2}
                         fill="#555F7C"
-                        onPress={() => handleBarPress(dayData, xPosition, chartHeight - 2, 2)}
                       />
                     );
                   }
@@ -197,15 +247,24 @@ const SleepChart: FC<SleepChartProps> = ({ sleepDataLast7Days }) => {
                     <RoundedBar
                       key={dayData.date} // Use date for key
                       x={xPosition}
-                      y={yPosition - 3}
+                      y={svgYPosition}
                       width={barWidth}
                       height={barHeight}
                       color="#4767C926"
-                      onPress={() => handleBarPress(dayData, xPosition, yPosition - 3, barHeight)}
                     />
                   );
               })}
           </Svg>
+          <View pointerEvents='box-none' style={StyleSheet.absoluteFill}>
+            {barConfigs.map(({ dayData, xPosition, pressYPosition }) => (
+              <Pressable
+                key={`${dayData.date}-pressable`}
+                style={[styles.barPressable, { left: xPosition, width: barWidth }]}
+                hitSlop={10}
+                onPress={createPressHandler(dayData, xPosition, pressYPosition)}
+              />
+            ))}
+          </View>
         </View>
         <View style={styles.labelsContainer}>
           {processedData.map((dayData) => (
@@ -230,11 +289,37 @@ const SleepChart: FC<SleepChartProps> = ({ sleepDataLast7Days }) => {
               {`${Math.floor(tooltip.hours)}h ${Math.round((tooltip.hours % 1) * 60)}m`}
             </Text>
             {tooltip.date && <Text style={styles.tooltipDate}>{tooltip.date}</Text>}
+            {tooltip.notes && (
+              <Pressable style={styles.notesButton} onPress={handleNotesButtonPress}>
+                <Text style={styles.notesButtonText}>Ver notas</Text>
+              </Pressable>
+            )}
             <View style={styles.tooltipArrow} />
           </View>
         )}
-      </View>
-    </TouchableWithoutFeedback>
+      </Pressable>
+      <Modal
+        visible={noteModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCloseNoteModal}
+      >
+        <Pressable style={styles.modalOverlay} onPress={handleCloseNoteModal}>
+          <Pressable style={styles.modalContent} onPress={(event) => event.stopPropagation?.()}>
+            <Text style={styles.modalTitle}>Notas do sono</Text>
+            {noteModalContent?.date && (
+              <Text style={styles.modalSubtitle}>{noteModalContent.date}</Text>
+            )}
+            {typeof modalHours === 'number' && (
+              <Text style={styles.modalSubtitle}>
+                {`${Math.floor(modalHours)}h ${Math.round((modalHours % 1) * 60)}m`}
+              </Text>
+            )}
+            <Text style={styles.modalNoteText}>{noteModalContent?.note ?? ''}</Text>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
   );
 };
 
@@ -249,6 +334,7 @@ const styles = StyleSheet.create({
   chartArea: {
     height: 130,
     marginBottom: 10,
+    position: 'relative',
   },
   labelsContainer: {
     flexDirection: 'row',
@@ -291,6 +377,18 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginTop: 2,
   },
+  notesButton: {
+    marginTop: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: Colors.Astronaut[500],
+  },
+  notesButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
   tooltipArrow: {
     position: 'absolute',
     bottom: -8,
@@ -304,6 +402,44 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderTopColor: '#FFFFFF',
+  },
+  barPressable: {
+    position: 'absolute',
+    bottom: 0,
+    top: 0,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 320,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    alignItems: 'flex-start',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1C2031',
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    color: '#555F7C',
+    marginBottom: 4,
+  },
+  modalNoteText: {
+    fontSize: 14,
+    color: '#1C2031',
+    marginTop: 12,
+    lineHeight: 20,
   },
 });
 
