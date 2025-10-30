@@ -46,7 +46,7 @@ export function AuthProvider({ children }:PropsWithChildren) {
         // 2. Atualiza o estado da aplicação.
         setIsLoggedIn(false);
         // 3. Redireciona para a tela de login (lógica original).
-        router.replace("/login");
+        router.replace("/prelogin");
     };
 
     // Este useEffect agora verifica a existência de tokens no SecureStore

@@ -24,28 +24,56 @@ type InputLoginProps={
     placeholder: string, 
     icone: 'Envelope' | 'Lock' | 'User' | 'Calendar',
     senha?: boolean,
-    value: string;
+    value?: string;
     onChangeText: (text: string) => void;
     autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+    type?: 'text' | 'date';
 }
 
 export default function InputLogin({
     placeholder,
     icone,
     senha=false,
-    value,
+    value="",
     onChangeText,
-    autoCapitalize = 'sentences'
+    autoCapitalize = 'sentences',
+    type = 'text'
 }:InputLoginProps){
+    
+    const handleDate = (value: string) => {
+        const cleanedDigits = value.replace(/\D/g, '');
+
+        let maskedValue = '';
+
+        // 2. Build the dd/mm/yyyy mask based ONLY on the sequence of digits
+        if (cleanedDigits.length > 0) {
+            // DD part (up to 2 digits)
+            maskedValue += cleanedDigits.substring(0, 2);
+        }
+
+        if (cleanedDigits.length >= 3) {
+            // Insert first slash (Requirement 3: Slash is inserted only after 2 digits).
+            maskedValue += '/';
+            maskedValue += cleanedDigits.substring(2, 4);
+        }
+
+        if (cleanedDigits.length >= 5) {
+            // Insert second slash (Requirement 3: Slash is inserted only after 4 digits).
+            maskedValue += '/';
+            maskedValue += cleanedDigits.substring(4, 8);
+        }
+
+        onChangeText(maskedValue);
+    };
 
     return(
         <View>
             <View style={styles.container}>
-                <Icon icon={icone}/>
+                <Icon icon={icone}/>             
                 <TextInput
                     style={styles.input}
                     value={value}
-                    onChangeText={onChangeText}
+                    onChangeText={type == "date" ? handleDate : onChangeText}
                     placeholder={placeholder}
                     placeholderTextColor={Colors.Astronaut[100]}
                     secureTextEntry={senha}
