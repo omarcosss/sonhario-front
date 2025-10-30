@@ -90,8 +90,7 @@ export interface SleepPlanData {
     goToBedTime: Date;
     wakeUpTime: Date;
     caffeineAmount: number;
-    // exerciseMinutes: number;
-    screenTime: number;
+    exercise: number;
 }
 
 export interface SleepPrevData {
@@ -99,8 +98,8 @@ export interface SleepPrevData {
     goToBedTime: Date;
     wakeUpTime: Date;
     caffeineAmount: number;
-    // exerciseMinutes: number;
-    screenTime: number;
+    exercise: number;
+    notes: string
 }
 
 interface SleepEntry {
@@ -129,10 +128,10 @@ export default function SleepRegister() {
     const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
     const [activePicker, setActivePicker] = useState<'date' | 'goToBed' | 'wakeUp'>('date');
     const [caffeineAmount, setCaffeineAmount] = useState(1);
-    const [screenTime, setScreenTime] = useState(30);
+    const [exercise, setExercise] = useState(15);
     const [tempDate, setTempDate] = useState(new Date());
 
-    const [anotacao, setAnotacao] = useState('');
+    const [notes, setNotes] = useState('');
     const [height, setHeight] = useState(40);
 
     const [insightResults, setInsightResults] = useState<any>(null);
@@ -245,7 +244,8 @@ export default function SleepRegister() {
                     sleep_start_time: dateConvertTo(goToBedTime, "time"),
                     sleep_end_time: dateConvertTo(wakeUpTime, "time"),
                     coffee_cups: caffeineAmount,
-                    screen_time: screenTime,
+                    execise: exercise,
+                    notes: notes,
                 }),
             });
             const data = await response.json();
@@ -294,7 +294,7 @@ export default function SleepRegister() {
             goToBedTime,
             wakeUpTime,
             caffeineAmount,
-            screenTime
+            exercise
         };
         handleSaveSleep(data);
         setShowConfirmPlan(false);
@@ -320,7 +320,8 @@ export default function SleepRegister() {
             goToBedTime,
             wakeUpTime,
             caffeineAmount,
-            screenTime
+            exercise,
+            notes
         };
         handleSaveSleep(data);
         setShowConfirmPrev(false);
@@ -455,8 +456,8 @@ export default function SleepRegister() {
                                 onContentSizeChange={(event) =>
                                     setHeight(event.nativeEvent.contentSize.height)
                                 }
-                                value={anotacao}
-                                onChangeText={setAnotacao}
+                                value={notes}
+                                onChangeText={setNotes}
                                 style={styles.TextInput}
                                 returnKeyType="done"
                             />
@@ -473,16 +474,32 @@ export default function SleepRegister() {
                         <Counter value={caffeineAmount} onValueChange={setCaffeineAmount} minValue={0} />
                     </View>
                     <View style={styles.InputRow}>
-                        <FText>
-                            Tempo de tela
-                        </FText>
-                        <Counter value={screenTime} onValueChange={setScreenTime} minValue={0} step={5} />
+                        <View style={{display: 'flex', gap: 4}}>
+                            <FText>Exercício</FText>
+                            <FText style={{color: Colors.Card.Stroke}} fontSize={12}>(Tempo em minutos)</FText>
+                        </View>
+                        <Counter value={exercise} onValueChange={setExercise} minValue={0} step={5} />
                     </View>
 
+                    {error && (
+                        <FText style={styles.errorText}>{error}</FText>
+                    )}
                     {selected === "planejar" ? (
-                        <Button mode="contained" onPress={handlePlanPrediction} style={{ flex: 1, backgroundColor: Colors.Astronaut[900], marginBottom: 80 }} disabled={loading}><FText>Continuar</FText></Button>
+                        <Button mode="contained" onPress={handlePlanPrediction} style={{ flex: 1, backgroundColor: Colors.Astronaut[900], marginBottom: 80 }} disabled={loading}>
+                            {loading ? (
+                                <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                            ) : (
+                                <FText>Continuar</FText>
+                            )}
+                        </Button>
                     ) : (
-                        <Button mode="contained" onPress={handleSavePrev} style={{ flex: 1, backgroundColor: Colors.Astronaut[900], marginBottom: 80 }} disabled={loading}><FText>Confirmar</FText></Button>
+                        <Button mode="contained" onPress={handleSavePrev} style={{ flex: 1, backgroundColor: Colors.Astronaut[900], marginBottom: 80 }} disabled={loading}>
+                            {loading ? (
+                                <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
+                            ) : (
+                                <FText>Continuar</FText>
+                            )}
+                        </Button>
                     )}
                 </ScrollView>
             </KeyboardAvoidingView>
