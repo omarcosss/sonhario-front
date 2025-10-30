@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import React, { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
 // Importe as funções do seu novo módulo de armazenamento seguro
 import { deleteTokens, getTokens, saveTokens } from './authStorage';
 
@@ -46,7 +46,7 @@ export function AuthProvider({ children }:PropsWithChildren) {
         // 2. Atualiza o estado da aplicação.
         setIsLoggedIn(false);
         // 3. Redireciona para a tela de login (lógica original).
-        router.replace("/login");
+        router.replace("/prelogin");
     };
 
     // Este useEffect agora verifica a existência de tokens no SecureStore

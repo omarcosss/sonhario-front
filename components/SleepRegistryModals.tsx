@@ -4,30 +4,24 @@ import SleepScore from "@/assets/icons/SleepScore";
 import Counter from "@/components/Counter";
 import FText from "@/components/FText";
 import { QualityChip } from "@/components/QualityChip";
+import UniversalDatePicker from "@/components/UniversalDatePicker";
 import { Colors } from "@/constants/Colors";
 import { getTokens } from "@/utils/authStorage";
-import DateTimePicker, {
-    DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
-import { BlurView } from "expo-blur";
 import React, {
-    forwardRef,
-    useCallback,
-    useImperativeHandle,
-    useMemo,
-    useReducer,
-    useRef,
-    useState,
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
 } from "react";
 import {
-    ActivityIndicator,
-    Modal,
-    Platform,
-    Pressable,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import ModalRN from "react-native-modal";
 import { Modalize } from "react-native-modalize";
@@ -181,42 +175,6 @@ const SleepRegistrySheet = forwardRef<
     dispatch({ type: "FIELD", key, value });
   }, []);
 
-  // ——— DateTime picker (shared) ———
-  const [pickerVisible, setPickerVisible] = useState(false);
-  const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
-  const [activePicker, setActivePicker] = useState<
-    "date" | "goToBed" | "wakeUp"
-  >("date");
-  const [tempDate, setTempDate] = useState(new Date());
-
-  const getPickerValue = (id: "date" | "goToBed" | "wakeUp") => {
-    if (id === "date") return state.sleepDate;
-    if (id === "goToBed") return state.goToBedTime;
-    return state.wakeUpTime;
-  };
-
-  const showPicker = (
-    mode: "date" | "time",
-    id: "date" | "goToBed" | "wakeUp"
-  ) => {
-    setPickerMode(mode);
-    setActivePicker(id);
-    setTempDate(getPickerValue(id));
-    setPickerVisible(true);
-  };
-
-  const onChangePicker = (_: DateTimePickerEvent, selected?: Date) => {
-    if (Platform.OS === "android") setPickerVisible(false);
-    if (!selected) return;
-    if (Platform.OS === "android") finalizePicker(selected);
-    else setTempDate(selected);
-  };
-
-  const finalizePicker = (d: Date) => {
-    if (activePicker === "date") setField("sleepDate", d);
-    else if (activePicker === "goToBed") setField("goToBedTime", d);
-    else setField("wakeUpTime", d);
-  };
 
   // ——— Derived ———
   const plannedDurationText = useMemo(() => {
@@ -336,7 +294,6 @@ const SleepRegistrySheet = forwardRef<
           <FormView
             state={state}
             setField={setField}
-            showPicker={showPicker}
             footer={
               <Footer error={error}>
                 <Button
@@ -445,7 +402,6 @@ const SleepRegistrySheet = forwardRef<
           <FormView
             state={state}
             setField={setField}
-            showPicker={showPicker}
             footer={
               <Footer error={error}>
                 <Button
@@ -524,48 +480,6 @@ const SleepRegistrySheet = forwardRef<
         )}
       </Modalize>
 
-      {/* Shared iOS/Android picker modal */}
-      <Modal
-        transparent
-        animationType="slide"
-        visible={pickerVisible}
-        onRequestClose={() => setPickerVisible(false)}
-      >
-        <Pressable
-          style={styles.modalBackdrop}
-          onPress={() => setPickerVisible(false)}
-        >
-          <BlurView intensity={40} style={styles.modalContent}>
-            <DateTimePicker
-              value={tempDate}
-              mode={pickerMode}
-              is24Hour
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={onChangePicker}
-              themeVariant="dark"
-            />
-            {Platform.OS === "ios" && (
-              <View style={styles.iosPickerHeader}>
-                <Button
-                  textColor={Colors.Astronaut[100]}
-                  onPress={() => setPickerVisible(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  textColor={Colors.Astronaut[100]}
-                  onPress={() => {
-                    finalizePicker(tempDate);
-                    setPickerVisible(false);
-                  }}
-                >
-                  Confirmar
-                </Button>
-              </View>
-            )}
-          </BlurView>
-        </Pressable>
-      </Modal>
 
       {/* Small confirmations */}
       <ModalRN
@@ -597,51 +511,45 @@ const SleepRegistrySheet = forwardRef<
 const FormView: React.FC<{
   state: FormState;
   setField: (k: keyof FormState, v: any) => void;
-  showPicker: (
-    mode: "date" | "time",
-    id: "date" | "goToBed" | "wakeUp"
-  ) => void;
   footer: React.ReactNode;
   children?: React.ReactNode;
-}> = ({ state, setField, showPicker, footer, children }) => {
+}> = ({ state, setField, footer, children }) => {
   return (
     <View style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <View style={styles.row}>
         <FText>Data</FText>
-        <TouchableOpacity
-          style={styles.datePickerButton}
-          onPress={() => showPicker("date", "date")}
-        >
-          <FText>{state.sleepDate.toLocaleDateString("pt-BR")}</FText>
-        </TouchableOpacity>
+        <View style={{ width: 200 }}>
+          <UniversalDatePicker
+            mode="date"
+            value={state.sleepDate}
+            onChange={(d) => setField("sleepDate", d)}
+            locale="pt-BR"
+          />
+        </View>
       </View>
+
       <View style={styles.row}>
         <FText>Vou dormir às</FText>
-        <TouchableOpacity
-          style={styles.datePickerButton}
-          onPress={() => showPicker("time", "goToBed")}
-        >
-          <FText>
-            {state.goToBedTime.toLocaleTimeString("pt-BR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </FText>
-        </TouchableOpacity>
+        <View style={{ width: 200 }}>
+          <UniversalDatePicker
+            mode="time"
+            value={state.goToBedTime}
+            onChange={(d) => setField("goToBedTime", d)}
+            locale="pt-BR"
+          />
+        </View>
       </View>
+
       <View style={styles.row}>
         <FText>Vou acordar às</FText>
-        <TouchableOpacity
-          style={styles.datePickerButton}
-          onPress={() => showPicker("time", "wakeUp")}
-        >
-          <FText>
-            {state.wakeUpTime.toLocaleTimeString("pt-BR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </FText>
-        </TouchableOpacity>
+        <View style={{ width: 200 }}>
+          <UniversalDatePicker
+            mode="time"
+            value={state.wakeUpTime}
+            onChange={(d) => setField("wakeUpTime", d)}
+            locale="pt-BR"
+          />
+        </View>
       </View>
       <Divider />
       <View style={styles.row}>
@@ -739,7 +647,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 12
   },
   footer: {
     display: "flex",
@@ -778,24 +686,6 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
     borderRadius: 15,
     color: Colors.Astronaut[50],
-  },
-  modalBackdrop: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    borderRadius: 20,
-    padding: 16,
-    margin: 20,
-    overflow: "hidden",
-  },
-  iosPickerHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#3A3A3C",
   },
   errorText: {
     color: "#ff8a80",
@@ -853,6 +743,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+
+
 
 SleepRegistrySheet.displayName = "SleepRegistrySheet";
 

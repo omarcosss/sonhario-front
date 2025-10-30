@@ -8,6 +8,7 @@ import './global.css';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider } from '@/utils/authContext';
+import React from 'react';
 import { Host } from 'react-native-portalize';
 
 export default function RootLayout(){

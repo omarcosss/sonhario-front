@@ -1,7 +1,7 @@
 import { Colors } from '@/constants/Colors';
 import { AuthContext } from '@/utils/authContext';
 import { Redirect, Stack } from 'expo-router';
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import 'react-native-reanimated';
 
 
@@ -20,8 +20,16 @@ export default function ProtectedLayout() {
         }, 
         headerTintColor: Colors.Astronaut[50] 
       }} />
+      <Stack.Screen name="entries/register"  options={{ 
+        headerTitle: 'Novo Sono', 
+        headerStyle: {
+          backgroundColor: '#161616'
+        }, 
+        headerTintColor: Colors.Astronaut[50] 
+      }} />
       <Stack.Screen name="+not-found" />
       <Stack.Screen name="prelogin" options={{ headerShown: false }} />
+      <Stack.Screen name="settings/profile" options={{ headerShown: false }} />
       <Stack.Screen name="(editor)" options={{ headerShown: false }} />
     </Stack>
   );

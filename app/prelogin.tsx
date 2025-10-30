@@ -39,7 +39,6 @@ export default function PreloginScreen() {
                 }),
             });
             const data = await response.json();
-            console.log(data);
             if (!response.ok) {
                 if (data.error == "Este email já está em uso") {
                   toLogin(email);

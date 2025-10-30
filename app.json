@@ -22,7 +22,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.svg"
+      "favicon": "./assets/images/favicon.ico"
     },
     "plugins": [
       "expo-router",

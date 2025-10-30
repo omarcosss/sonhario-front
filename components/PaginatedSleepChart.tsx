@@ -1,7 +1,7 @@
 import Chevron from '@/assets/icons/Chevron';
 import { Colors } from '@/constants/Colors';
 import React, { FC, useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { GestureResponderEvent, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Line, Rect, Svg } from 'react-native-svg';
 import FText from './FText';
 
@@ -22,7 +22,6 @@ interface RoundedBarProps {
   width: number;
   height: number;
   color: string;
-  onPress?: () => void;
 }
 
 // Internal state holds the generated day name
@@ -50,7 +49,7 @@ interface PaginatedSleepChartProps {
 }
 
 // --- Helper Component for Bar (Unchanged) ---
-const RoundedBar: FC<RoundedBarProps> = ({ width, height, x, y, color, onPress }) => {
+const RoundedBar: FC<RoundedBarProps> = ({ width, height, x, y, color }) => {
   if (height <= 0) return null;
   const barRadius = Math.min(width / 2); // Added a max radius for aesthetics
 
@@ -64,7 +63,6 @@ const RoundedBar: FC<RoundedBarProps> = ({ width, height, x, y, color, onPress }
       stroke={Colors.Astronaut[400]}
       rx={barRadius}
       ry={barRadius}
-      onPress={onPress}
     />
   );
 };
@@ -183,67 +181,95 @@ const PaginatedSleepChart: FC<PaginatedSleepChartProps> = ({ sleepData }) => {
     return <Text style={styles.loadingText}>Loading sleep data...</Text>;
   }
 
+  const barConfigs = processedData.map((dayData, index) => {
+    const barScaleFactor = maxSleepHours > 0 ? dayData.hours / maxSleepHours : 0;
+    const barHeight = dayData.hours > 0 ? barScaleFactor * chartHeight * 0.9 : 0;
+    const xPosition = index * (barWidth + barMargin);
+    const hasSleepHours = dayData.hours > 0 && barHeight > 0;
+    const svgYPosition = hasSleepHours ? chartHeight - barHeight - 3 : chartHeight - 2;
+    const pressYPosition = hasSleepHours ? chartHeight - barHeight - 3 : chartHeight - 2;
+
+    return {
+      dayData,
+      xPosition,
+      barHeight,
+      hasSleepHours,
+      svgYPosition,
+      pressYPosition,
+    };
+  });
+
+  const createPressHandler = (dayData: ProcessedSleepRecord, xPosition: number, yPosition: number) => {
+    return (event: GestureResponderEvent) => {
+      event.stopPropagation?.();
+      handleBarPress(dayData, xPosition, yPosition);
+    };
+  };
+
   return (
-    <TouchableWithoutFeedback onPress={handleOutsidePress}>
-      <View style={styles.container}>
-        {/* --- Navigation Header --- */}
-        <View style={styles.navigationContainer}>
-          <TouchableOpacity onPress={handlePreviousWeek} style={styles.navButton}>
-            <Chevron />
-          </TouchableOpacity>
-          <FText style={styles.dateRangeText}>{formatDateRange()}</FText>
-          <TouchableOpacity onPress={handleNextWeek} disabled={isNextWeekDisabled()} style={styles.navButton}>
-            <Chevron direction='right' style={[isNextWeekDisabled() && styles.navArrowDisabled]}/>
-          </TouchableOpacity>
-        </View>
+    <Pressable style={styles.container} onPress={handleOutsidePress}>
+      {/* --- Navigation Header --- */}
+      <View style={styles.navigationContainer}>
+        <TouchableOpacity onPress={handlePreviousWeek} style={styles.navButton}>
+          <Chevron />
+        </TouchableOpacity>
+        <FText style={styles.dateRangeText}>{formatDateRange()}</FText>
+        <TouchableOpacity onPress={handleNextWeek} disabled={isNextWeekDisabled()} style={styles.navButton}>
+          <Chevron direction='right' style={[isNextWeekDisabled() && styles.navArrowDisabled]}/>
+        </TouchableOpacity>
+      </View>
 
-        {/* --- Chart Area --- */}
-        <View style={styles.chartArea}>
-          <Svg height={chartHeight} width={totalChartWidth}>
-            {/* Base and Grid Lines */}
-            <Line x1="0" y1={chartHeight} x2={totalChartWidth} y2={chartHeight} stroke={Colors.Astronaut[200]} strokeWidth="1"/>
-            {[1, 2, 3].map((n) => {
-              const yPositionGrid = (chartHeight / 4) * n;
-              return <Line key={`grid-${n}`} x1="0" y1={chartHeight - yPositionGrid} x2={totalChartWidth} y2={chartHeight - yPositionGrid} stroke='#CAD9F333' strokeWidth="1"/>;
-            })}
+      {/* --- Chart Area --- */}
+      <View style={styles.chartArea}>
+        <Svg height={chartHeight} width={totalChartWidth}>
+          {/* Base and Grid Lines */}
+          <Line x1="0" y1={chartHeight} x2={totalChartWidth} y2={chartHeight} stroke={Colors.Astronaut[200]} strokeWidth="1"/>
+          {[1, 2, 3].map((n) => {
+            const yPositionGrid = (chartHeight / 4) * n;
+            return <Line key={`grid-${n}`} x1="0" y1={chartHeight - yPositionGrid} x2={totalChartWidth} y2={chartHeight - yPositionGrid} stroke='#CAD9F333' strokeWidth="1"/>;
+          })}
 
-            {/* Data Bars */}
-            {processedData.map((dayData, index) => {
-              const barScaleFactor = maxSleepHours > 0 ? dayData.hours / maxSleepHours : 0;
-              const barHeight = dayData.hours > 0 ? barScaleFactor * chartHeight * 0.9 : 0;
-              const xPosition = index * (barWidth + barMargin);
-              const yPosition = chartHeight - barHeight;
-
-              if (dayData.hours === 0 || barHeight <= 0) {
-                return (
-                  <Rect key={`${dayData.date}-empty`} x={xPosition + (barWidth / 2) - 1} y={chartHeight - 2} width={2} height={2} fill="#555F7C" onPress={() => handleBarPress(dayData, xPosition, chartHeight - 2)}/>
-                );
-              }
-
+          {/* Data Bars */}
+          {barConfigs.map(({ dayData, xPosition, barHeight, hasSleepHours, svgYPosition }) => {
+            if (!hasSleepHours) {
               return (
-                <RoundedBar key={dayData.date} x={xPosition} y={yPosition - 3} width={barWidth} height={barHeight} color="#4767C926" onPress={() => handleBarPress(dayData, xPosition, yPosition - 3)}/>
+                <Rect key={`${dayData.date}-empty`} x={xPosition + (barWidth / 2) - 1} y={chartHeight - 2} width={2} height={2} fill="#555F7C"/>
               );
-            })}
-          </Svg>
-        </View>
+            }
 
-        {/* --- Day Labels --- */}
-        <View style={styles.labelsContainer}>
-          {processedData.map((dayData) => (
-            <Text key={`${dayData.date}-label`} style={styles.label}>{dayData.day}</Text>
+            return (
+              <RoundedBar key={dayData.date} x={xPosition} y={svgYPosition} width={barWidth} height={barHeight} color="#4767C926"/>
+            );
+          })}
+        </Svg>
+        <View pointerEvents='box-none' style={StyleSheet.absoluteFill}>
+          {barConfigs.map(({ dayData, xPosition, pressYPosition }) => (
+            <Pressable
+              key={`${dayData.date}-pressable`}
+              style={[styles.barPressable, { left: xPosition, width: barWidth }]}
+              hitSlop={10}
+              onPress={createPressHandler(dayData, xPosition, pressYPosition)}
+            />
           ))}
         </View>
-
-        {/* --- Tooltip --- */}
-        {tooltip?.visible && (
-          <View style={[styles.tooltip, { left: tooltip.x, top: tooltip.y }]}>
-            <Text style={styles.tooltipText}>{`${Math.floor(tooltip.hours)}h ${Math.round((tooltip.hours % 1) * 60)}m`}</Text>
-            {tooltip.date && <Text style={styles.tooltipDate}>{tooltip.date}</Text>}
-            <View style={styles.tooltipArrow} />
-          </View>
-        )}
       </View>
-    </TouchableWithoutFeedback>
+
+      {/* --- Day Labels --- */}
+      <View style={styles.labelsContainer}>
+        {processedData.map((dayData) => (
+          <Text key={`${dayData.date}-label`} style={styles.label}>{dayData.day}</Text>
+        ))}
+      </View>
+
+      {/* --- Tooltip --- */}
+      {tooltip?.visible && (
+        <View style={[styles.tooltip, { left: tooltip.x, top: tooltip.y }]}>
+          <Text style={styles.tooltipText}>{`${Math.floor(tooltip.hours)}h ${Math.round((tooltip.hours % 1) * 60)}m`}</Text>
+          {tooltip.date && <Text style={styles.tooltipDate}>{tooltip.date}</Text>}
+          <View style={styles.tooltipArrow} />
+        </View>
+      )}
+    </Pressable>
   );
 };
 
@@ -288,6 +314,7 @@ const styles = StyleSheet.create({
   chartArea: {
     height: 130,
     marginBottom: 10,
+    position: 'relative',
   },
   labelsContainer: {
     flexDirection: 'row',
@@ -343,6 +370,11 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderTopColor: '#FFFFFF',
+  },
+  barPressable: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
   },
 });
 
