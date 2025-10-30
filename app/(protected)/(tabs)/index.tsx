@@ -12,7 +12,7 @@ import { getTokens } from "@/utils/authStorage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, RelativePathString, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ScrollView, StatusBar, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StatusBar, StyleSheet, View } from "react-native";
 import { ActivityIndicator, Button, Surface } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -223,7 +223,9 @@ export default function HomeScreen() {
                                                 {latestSleep}h
                                             </FText>
                                         </View>
-                                        <FText>{latestSleepRating}</FText>
+                                        <FText style={styles.sleepStringText}>
+                                            {latestSleepRating}
+                                        </FText>
                                     </>
                                 ) : (
                                     <>
@@ -263,30 +265,25 @@ export default function HomeScreen() {
                                                 </Button>
                                             </Link>
                                         </View>
-                                        <FText>Você ainda não fez nenhum registro de sono.</FText>
-                                        <FText>Vamos começar hoje?</FText>
+                                        <FText style={styles.sleepStringText}>
+                                            Você ainda não fez nenhum registro de sono.
+                                        </FText>
+                                        <FText style={styles.sleepStringText}>
+                                            Vamos começar hoje?
+                                        </FText>
                                     </>
                                 )}
 
                                 <SleepChart sleepDataLast7Days={sleepHistory} />
                             </Surface>
-                            <View
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    gap: 20,
-                                    width: "100%",
-                                    flex: 1,
-                                    height: 140,
-                                    marginTop: 16,
-                                }}
-                            >
+                            <View style={styles.smallCardContainer}>
                                 <Surface style={styles.smallCard} elevation={4}>
                                     {deficit && deficit.status !== "even" ? (
                                         <>
                                             <FText
                                                 style={{
                                                     fontWeight: "200",
+                                                    fontSize: 12,
                                                 }}
                                             >
                                                 Você está com:
@@ -294,7 +291,7 @@ export default function HomeScreen() {
                                             <FText
                                                 style={{
                                                     color: deficit.color,
-                                                    fontSize: 32,
+                                                    fontSize: 28,
                                                     fontWeight: "700",
                                                 }}
                                             >
@@ -303,6 +300,7 @@ export default function HomeScreen() {
                                             <FText
                                                 style={{
                                                     fontWeight: "400",
+                                                    fontSize: 12
                                                 }}
                                             >
                                                 de {deficit.natural} de sono esta semana
@@ -314,6 +312,7 @@ export default function HomeScreen() {
                                             <FText
                                                 style={{
                                                     fontWeight: "400",
+                                                    fontSize: 12
                                                 }}
                                             >
                                                 Parabéns, sono em dia esta semana!
@@ -321,7 +320,7 @@ export default function HomeScreen() {
                                         </>
                                     )}
                                 </Surface>
-                                <Button
+                                <Pressable
                                     style={styles.addButtonCard} onPress={addSleep}
                                 >
                                     <View style={{display: 'flex', padding: 20}}>
@@ -332,7 +331,7 @@ export default function HomeScreen() {
                                             Novo Sono
                                         </FText>
                                     </View>
-                                </Button>
+                                </Pressable>
                             </View>
                         </View>
                     </ScrollView>
@@ -345,7 +344,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: StatusBar.currentHeight,
+        paddingTop: StatusBar.currentHeight
     },
     scrollView: {
         flex: 1,
@@ -367,13 +366,25 @@ const styles = StyleSheet.create({
         borderColor: Colors.Card.Stroke,
         backgroundColor: Colors.Card.Background,
     },
+    sleepStringText: {
+        fontSize: 12
+    },
+    smallCardContainer: {
+        display: "flex",
+        flexDirection: "row",
+        gap: 20,
+        width: "100%",
+        flex: 1,
+        minHeight: 140,
+        marginTop: 16,
+    },
     smallCard: {
         display: "flex",
         flex: 1,
         justifyContent: "center",
         alignItems: "flex-start",
         padding: 20,
-        height: 140,
+        minHeight: 140,
         borderRadius: 30,
         borderWidth: 1,
         borderColor: Colors.Card.Stroke,
@@ -382,14 +393,13 @@ const styles = StyleSheet.create({
     addButtonCard: {
         display: "flex",
         flexDirection: 'column',
-        height: 140,
+        minHeight: 140,
         justifyContent: "center",
         alignItems: "flex-end",
         borderRadius: 30,
         borderWidth: 1,
         borderColor: Colors.Card.Stroke,
         backgroundColor: Colors.Astronaut[900],
-
     },
     errorText: {
         color: "#ff8a80",
