@@ -127,11 +127,11 @@ export default function SleepRegister() {
     const [showPicker, setShowPicker] = useState(false);
     const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
     const [activePicker, setActivePicker] = useState<'date' | 'goToBed' | 'wakeUp'>('date');
-    const [caffeineAmount, setCaffeineAmount] = useState(1);
-    const [exercise, setExercise] = useState(15);
+    const [caffeineAmount, setCaffeineAmount] = useState<number>(1);
+    const [exercise, setExercise] = useState<number>(15);
     const [tempDate, setTempDate] = useState(new Date());
 
-    const [notes, setNotes] = useState('');
+    const [notes, setNotes] = useState(null);
     const [height, setHeight] = useState(40);
 
     const [insightResults, setInsightResults] = useState<any>(null);
@@ -244,7 +244,7 @@ export default function SleepRegister() {
                     sleep_start_time: dateConvertTo(goToBedTime, "time"),
                     sleep_end_time: dateConvertTo(wakeUpTime, "time"),
                     coffee_cups: caffeineAmount,
-                    execise: exercise,
+                    exercise: exercise,
                     notes: notes,
                 }),
             });
@@ -298,6 +298,7 @@ export default function SleepRegister() {
         };
         handleSaveSleep(data);
         setShowConfirmPlan(false);
+        router.push('/');
     };
 
     const handleSavePrev = () => {
