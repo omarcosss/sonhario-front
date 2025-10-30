@@ -21,12 +21,12 @@ export default function ProfileEditScreen () {
     gender: '',
   });
 
-  const formatDateForFetch = (data: any) => {
+  const formatDateForFetch = (data: any, slashes: boolean = false) => {
     const newData = {...data};
-    const birthdate = newData.birthdate.split('/');
+    const birthdate = newData.birthdate.split(slashes ? '-' : '/');
     if (birthdate.length < 3) return data;
 
-    newData.birthdate = birthdate.reverse().join('-');   
+    newData.birthdate = birthdate.reverse().join(slashes ? '/' : '-');
 
     return newData;
   }
@@ -81,11 +81,11 @@ export default function ProfileEditScreen () {
             setError(data.error || 'Houve um problema ao recuperar informações do perfil.');
         } else {
             setError(null);
-            setFormData({
+            setFormData(formatDateForFetch({
               display_name: data.display_name,
               birthdate: data.birthdate,
               gender: data.gender,
-            })
+            }, true))
             success = true;
         }
     } catch (e) {
@@ -145,7 +145,7 @@ export default function ProfileEditScreen () {
                 {loading ? (
                     <ActivityIndicator size="small" color={Colors.Astronaut[100]} />
                 ) : (
-                    <Text style={styles.solidButtonText}>CADASTRAR</Text>
+                    <Text style={styles.solidButtonText}>ATUALIZAR</Text>
                 )}
                 </Pressable>
                 </View>
