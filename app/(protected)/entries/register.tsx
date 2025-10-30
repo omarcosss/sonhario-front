@@ -469,6 +469,7 @@ export default function SleepRegister() {
                             <View style={styles.InputRow}>
                                 <View style={{display: 'flex', gap: 4}}>
                                     <FText>Qualidade do sono</FText>
+                                    <FText style={{color: Colors.Card.Stroke}} fontSize={12}>(Nota de 1 a 10)</FText>
                                 </View>
                                 <Counter value={sleepQuality} onValueChange={setSleepQuality} minValue={0} maxValue={10} />
                             </View>
@@ -480,14 +481,14 @@ export default function SleepRegister() {
                     <View style={styles.InputRow}>
                         <View style={{display: 'flex', gap: 4}}>
                             <FText>Cafeína consumida</FText>
-                            <FText style={{color: Colors.Card.Stroke}} fontSize={12}>(Xícaras)</FText>
+                            <FText style={{color: Colors.Card.Stroke}} fontSize={12}>(Xícaras de 95 ml)</FText>
                         </View>
                         <Counter value={caffeineAmount} onValueChange={setCaffeineAmount} minValue={0} />
                     </View>
                     <View style={styles.InputRow}>
                         <View style={{display: 'flex', gap: 4}}>
-                            <FText>Exercício</FText>
-                            <FText style={{color: Colors.Card.Stroke}} fontSize={12}>(Tempo em minutos)</FText>
+                            <FText>Tempo de exercício</FText>
+                            <FText style={{color: Colors.Card.Stroke}} fontSize={12}>(Em minutos)</FText>
                         </View>
                         <Counter value={exercise} onValueChange={setExercise} minValue={0} step={5} />
                     </View>
