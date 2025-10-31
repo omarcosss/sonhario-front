@@ -1,6 +1,7 @@
 # Sonhario - Frontend
 ![Sonhario Logo](assets/images/cover.png)
-A aplicção frontend em Expo do aplicativo **Sonhario** -- um diário de hábitos do sono que usa dados passados para tentar melhorar a sua rotina. Projeto desenvolvido para fins de estudo.
+A aplicção frontend em Expo do aplicativo **Sonhario** -- um diário de hábitos do sono que usa dados passados para tentar melhorar a sua rotina. Projeto desenvolvido para fins de estudo.\
+Confira também o [repositório da API](https://github.com/bunny-sammy/sonhario-api)
 
 ## Tecnologias Utilizadas
 * [Expo](https://expo.dev/)
